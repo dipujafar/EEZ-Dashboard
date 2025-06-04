@@ -2,6 +2,7 @@ import { RiDashboardHorizontalFill, RiLogoutCircleLine } from "react-icons/ri";
 import { GoPeople } from "react-icons/go";
 import Link from "next/link";
 import {
+  ListChecks,
   Star,
   Wallet,
   WalletCards,
@@ -20,11 +21,20 @@ export const navLinks = [
     label: <Link href={"/customers"}>Account Details</Link>,
   },
   {
+    key: "manage-features",
+    icon: <ListChecks  size={18} />,
+    label: <Link href={"/manage-features"}>Manage Features</Link>,
+  },
+  {
+    key: "manage-specialist",
+    icon: <ListChecks  size={18} />,
+    label: <Link href={"/manage-features"}>Manage Specialist</Link>,
+  },
+  {
     key: "earning",
     icon: <Wallet size={18} />,
     label: <Link href={"/earning"}>Earning</Link>,
   },
-
   {
     key: "subscriptions",
     icon: <WalletCards size={18} />,

@@ -62,7 +62,7 @@ const JournalPrompt = ({ prompts, onEdit }: PromptGridProps) => {
       <div className="w-fit ml-auto">
         <Pagination defaultCurrent={1} total={50} />
       </div>
-      <AddContentModal isOpen={openAddContent} onClose={() => setOpenAddContent(false)} onSave={() => {}}></AddContentModal>
+      {/* <AddContentModal isOpen={openAddContent} onClose={() => setOpenAddContent(false)} onSave={() => {}}></AddContentModal> */}
     </div>
   );
 };

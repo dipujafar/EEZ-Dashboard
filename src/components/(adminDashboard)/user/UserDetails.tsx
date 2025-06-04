@@ -24,11 +24,11 @@ const UserDetails = ({ open, setOpen }: TPropsType) => {
         <div className="flex justify-between items-center">
           <div></div>
           <div
-            className="w-10 h-10 bg-transparent border border-red-500 hover:bg-red-600   rounded-full flex justify-center items-center cursor-pointer group duration-500"
+            className="size-8 bg-transparent border border-red-500 hover:bg-red-600   rounded-full flex justify-center items-center cursor-pointer group duration-500"
             onClick={() => setOpen(false)}
           >
             <RiCloseLargeLine
-              size={15}
+              size={14}
               className="text-red-600 group-hover:text-red-100 group"
             />
           </div>
