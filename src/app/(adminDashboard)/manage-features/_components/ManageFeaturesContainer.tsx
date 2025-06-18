@@ -1,29 +1,31 @@
 "use client";
 import { Tabs } from "antd";
+import GuidanceHub from "./GuidanceHub/GuidanceHub";
+import WorkplaceJournalContainer from "./WorkplaceJournal/WorkplaceJournalContainer";
 
 const tabData = [
   {
-    label: 'Guidance Hub',
+    label: "Guidance Hub",
     key: "1",
-    children: "Guidance Hub", 
+    children: <GuidanceHub />,
   },
   {
-    label: 'Workplace Journal',
+    label: "Workplace Journal",
     key: "2",
-    children: "Workplace Journal",
+    children: <WorkplaceJournalContainer/>,
   },
   {
-    label: 'Communication Toolkit',
+    label: "Communication Toolkit",
     key: "3",
     children: "Communication Toolkit",
   },
   {
-    label: 'Policy & Rights Library',
+    label: "Policy & Rights Library",
     key: "4",
     children: "Policy & Rights Library",
   },
   {
-    label: 'Job Search Help',
+    label: "Job Search Help",
     key: "5",
     children: "Job Search Help",
   },

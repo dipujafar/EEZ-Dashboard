@@ -17,10 +17,9 @@ const UserDetails = ({ open, setOpen }: TPropsType) => {
       style={{
         minWidth: "max-content",
         position: "relative",
-      
       }}
     >
-      <div className=" ">
+      <div>
         <div className="flex justify-between items-center">
           <div></div>
           <div
@@ -81,7 +80,7 @@ const UserDetails = ({ open, setOpen }: TPropsType) => {
             <h4>Streak Progress </h4>
             <p className="font-medium">5 days streak</p>
           </div>
-          <div className="flex justify-between py-3 px-2">
+          <div className="flex justify-between  bg-[#21424617] py-3 px-2 border-b">
             <h4>Status </h4>
             <p className="font-medium">Active</p>
           </div>
