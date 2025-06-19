@@ -37,14 +37,14 @@ const RecentlyUser = () => {
     {
       title: "Serial",
       dataIndex: "serial",
-         align: "center",
+      align: "center",
       render: (text) => <p>#{text}</p>,
     },
     {
       title: "User Name",
       dataIndex: "name",
       align: "center",
-      render: (text, record) => (
+      render: (text) => (
         <div className="flex  justify-center items-center gap-x-1">
           <Image
             src={"/user_image1.png"}
@@ -66,18 +66,7 @@ const RecentlyUser = () => {
       title: "Account Type",
       dataIndex: "type",
       align: "center",
-      filters: [
-        {
-          text: "User",
-          value: "User",
-        },
-        {
-          text: "Admin",
-          value: "Admin",
-        },
-      ],
-      filterIcon: () => <ArrowDownNarrowWide color="#fff" />,
-      onFilter: (value, record) => record.type.indexOf(value as string) === 0,
+    
     },
 
     {
@@ -89,7 +78,7 @@ const RecentlyUser = () => {
     {
       title: "Action",
       dataIndex: "action",
-         align: "center",
+      align: "center",
       render: () => (
         <div className="flex justify-center gap-2">
           <Eye

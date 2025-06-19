@@ -28,9 +28,7 @@ const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 // Validation schema
 const formSchema = z.object({
-  helpName: z
-    .string()
-    .min(1, "Category name is required"),
+  helpName: z.string().min(1, "Category name is required"),
   file: z.instanceof(File),
   docFile: z.instanceof(File),
   tone: z.string().optional(),
@@ -41,11 +39,9 @@ type FormData = z.infer<typeof formSchema>;
 const AddJobSearchHelp = ({
   open,
   setOpen,
- 
 }: {
   open: boolean;
   setOpen: (collapsed: boolean) => void;
-  
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<File | null>(null);
@@ -73,8 +69,6 @@ const AddJobSearchHelp = ({
       tone: "",
     },
   });
-
-
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -116,7 +110,6 @@ const AddJobSearchHelp = ({
     }
   };
 
- 
   const onSubmit = (data: FormData) => {
     // call api for submitting the form
   };
@@ -261,12 +254,11 @@ const AddJobSearchHelp = ({
                     )}
                   />
 
-
-{/* Content */}
+                  {/* Content */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Label className="text-sm font-medium text-gray-700">
-                       Content
+                        Content
                       </Label>
                       <HelpCircle className="w-4 h-4 text-gray-400" />
                     </div>
@@ -288,7 +280,7 @@ const AddJobSearchHelp = ({
                     />
                   </div>
 
-                   {/* Upload IUpload Any Resource or Document Section */}
+                  {/* Upload IUpload Any Resource or Document Section */}
                   <FormField
                     control={form.control}
                     name="file"

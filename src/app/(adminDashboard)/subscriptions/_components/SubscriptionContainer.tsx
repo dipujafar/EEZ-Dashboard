@@ -1,107 +1,79 @@
-import { Check, X } from "lucide-react";
+import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-interface Feature {
-  name: string;
-  included: boolean;
-}
-
 interface PricingPlan {
-  name: string;
-  price: number;
-  period: string;
-  features: Feature[];
+  id: string;
+  title: string;
+  subtitle: string;
+  price: string;
+  description: string;
   buttonText: string;
-  popular?: boolean;
+  gradient: string;
 }
 
-const pricingData: PricingPlan[] = [
+const pricingPlans: PricingPlan[] = [
   {
-    name: "Freemium",
-    price: 0,
-    period: "Per Month/Free",
-    features: [
-      { name: "Post up to 5 listing", included: true },
-      { name: "1 photo upload listing", included: true },
-      { name: "Unlimited messaging", included: true },
-      { name: "Appointment reminders", included: false },
-      { name: "Email and community support", included: false },
-    ],
-    buttonText: "Edit",
+    id: "basic",
+    title: "Basic Plan",
+    subtitle: "Unlimited to free subscription plan",
+    price: "Free",
+    description:
+      "Access core career tools, AI assistance, scripts, and job search resources — all for free.",
+    buttonText: "EDIT",
+    gradient: "bg-gradient-to-r from-teal-600 to-teal-700",
   },
   {
-    name: "Quarterly",
-    price: 39.99,
-    period: "Per Month",
-    features: [
-      { name: "Unlimited product updates", included: true },
-      { name: "Unlimited product updates", included: true },
-      { name: "Unlimited product updates", included: true },
-      { name: "Appointment reminders", included: true },
-      { name: "Email and community support", included: true },
-    ],
-    buttonText: "Edit",
-    popular: true,
+    id: "premium",
+    title: "Premium Plan",
+    subtitle: "Limited to paid subscription plan",
+    price: "$52.00/month",
+    description:
+      "Access core career tools, plus exclusive live coaching and direct messaging with certified career advisors.",
+    buttonText: "EDIT",
+    gradient: "bg-gradient-to-r from-teal-600 to-teal-700",
   },
 ];
 
 export default function SubscriptionContainer() {
   return (
-    <div className="w-full max-w-3xl mx-auto p-6">
-      <div className="grid md:grid-cols-2 gap-6">
-        {pricingData.map((plan, index) => (
-          <Card key={index} className="relative">
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        {pricingPlans.map((plan) => (
+          <Card key={plan.id} className="bg-gray-50 border-0 shadow-lg">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-lg font-medium text-teal-600 mb-4">
-                {plan.name}
-              </CardTitle>
-              <div className="space-y-1">
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold text-teal-600">
-                    {plan.price}
-                  </span>
-                  <span className="text-sm text-teal-600">$</span>
-                </div>
-                <p className="text-sm text-teal-600">{plan.period}</p>
-              </div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                {plan.title}
+              </h2>
+              <p className="text-sm text-gray-600">{plan.subtitle}</p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                {plan.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center gap-3">
-                    <div className="flex-shrink-0">
-                      {feature.included ? (
-                        <div className="w-5 h-5 rounded-full bg-teal-500 flex items-center justify-center">
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center">
-                          <X className="w-3 h-3 text-gray-500" />
-                        </div>
-                      )}
-                    </div>
-                    <span
-                      className={`text-sm ${
-                        feature.included ? "text-gray-900" : "text-gray-400"
-                      }`}
-                    >
-                      {feature.name}
-                    </span>
-                  </div>
-                ))}
+
+            <CardContent className="px-6 pb-6">
+              <div
+                style={{
+                  background:
+                    "linear-gradient(180deg, #4E9DA6 0.89%, #1A2935 100.89%)",
+                  boxShadow: "0px 4px 12px 0px rgba(0, 0, 0, 0.09)",
+                }}
+                className={`${plan.gradient} text-white text-center py-2 px-6 rounded-lg mb-6`}
+              >
+                <div className="text-2xl font-bold">{plan.price}</div>
               </div>
-              <div>
-                <Link href="/add-subscription">
-                  <Button
-                    className="w-full bg-teal-500 hover:bg-teal-600 text-white"
-                    variant="default"
-                  >
-                    {plan.buttonText}
-                  </Button>
-                </Link>
-              </div>
+
+              <p className="text-gray-700 text-sm leading-relaxed mb-6 min-h-[60px]">
+                {plan.description}
+              </p>
+              <Link href={"/subscriptions/add-subscription"}>
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 font-medium border border-t-[#59b0ba] border-l-[#448b93] border-b-[#32656a] border-r-[#2a5256] group"
+                >
+                  {plan.buttonText}
+                  <AnimatedArrow />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         ))}

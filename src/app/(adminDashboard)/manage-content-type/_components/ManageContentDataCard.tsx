@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Image } from "antd";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
+import { AddContentModal } from "./AddContentModal";
+import { useState } from "react";
 
 interface PromptCardProps {
   id: string;
@@ -22,6 +24,7 @@ const ManageContentDataCard = ({
   imageUrl,
   onEdit,
 }: PromptCardProps) => {
+  const [openEditContent, setOpenEditContent] = useState(false);
   const getStatusColor = (status: string) => {
     return status === "Completed"
       ? "bg-blue-100 text-blue-800"
@@ -67,7 +70,7 @@ const ManageContentDataCard = ({
               size={"sm"}
               variant="outline"
               className="w-full flex items-center justify-center gap-2 text-sm font-medium group text-transparent bg-clip-text bg-gradient-to-b from-[#4E9DA6] to-[#1A2935]"
-              onClick={() => onEdit(id)}
+              onClick={() => {onEdit(id); setOpenEditContent(true)}}
               style={{
                 border: " 1px solid var(--Linear, #4E9DA6)",
               }}
@@ -78,6 +81,7 @@ const ManageContentDataCard = ({
           </div>
         </div>
       </CardContent>
+      <AddContentModal isOpen={openEditContent} onClose={() => setOpenEditContent(false)} onSave={() => {}}></AddContentModal>
     </Card>
   );
 };

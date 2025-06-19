@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   Award,
   ListChecks,
+  LogOut,
   Star,
   Wallet,
   WalletCards,
@@ -51,6 +52,11 @@ export const navLinks = [
     icon: <IoSettingsOutline size={18} />,
     label: <Link href={"/settings"}>Settings</Link>,
   },
+  {
+    key: "logout",
+    icon: <LogOut size={18} />,
+    label: <Link href={"/login"} className="!text-[#5F1011]">Logout</Link>,
+  }
   //   {
   //     key: "user-request",
   //     icon: <PiListPlusFill size={20} />,

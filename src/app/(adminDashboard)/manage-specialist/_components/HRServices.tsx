@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Calendar, Briefcase, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { message, Popconfirm, PopconfirmProps } from "antd";
+import { message, Pagination, Popconfirm, PopconfirmProps } from "antd";
 
 interface Specialist {
   id: number;
@@ -226,6 +226,10 @@ export default function HRServices() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+       <div className="w-fit ml-auto mt-5">
+        <Pagination defaultCurrent={1} total={50} />
       </div>
     </div>
   );

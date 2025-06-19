@@ -1,5 +1,7 @@
+import dynamic from 'next/dynamic';
 import { useRef } from 'react';
-import ReactQuill from 'react-quill';
+
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import 'react-quill/dist/quill.snow.css';
 
 interface RichTextEditorProps {
@@ -8,8 +10,8 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
-export const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) => {
-  const quillRef = useRef<ReactQuill>(null);
+const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) => {
+  const quillRef = useRef(null);
 
   const modules = {
     toolbar: [
@@ -30,6 +32,7 @@ export const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorP
   return (
     <div className="bg-white rounded-lg border">
       <ReactQuill
+      // @ts-ignore
         ref={quillRef}
         theme="snow"
         value={value}
@@ -37,8 +40,12 @@ export const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorP
         modules={modules}
         formats={formats}
         placeholder={placeholder}
-        style={{ height: '200px', marginBottom: '42px' }}
+        style={{ height: '200px', marginBottom: '42px', overflow: 'hidden' }}
       />
     </div>
   );
 };
+
+export default dynamic(() => Promise.resolve(RichTextEditor), {
+  ssr: false,
+});

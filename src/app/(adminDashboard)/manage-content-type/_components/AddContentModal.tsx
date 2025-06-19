@@ -1,8 +1,9 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+
 import {
   Dialog,
   DialogContent,
@@ -27,7 +28,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RichTextEditor } from "./RichTextEditor";
+import RichTextEditor from "./RichTextEditor";
+
 
 export interface ContentItem {
   id: string;
@@ -43,7 +45,6 @@ export interface ContentItem {
 
 const contentSchema = z.object({
   contentType: z.string().min(1, "Content type is required"),
-  imageUrl: z.string().optional(),
   content: z.string().min(1, "Content is required"),
   date: z.string().min(1, "Date is required"),
   time: z.string().min(1, "Time is required"),
@@ -73,11 +74,13 @@ export const AddContentModal = ({
   onSave,
   editingContent,
 }: ContentModalProps) => {
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+
   const form = useForm<ContentFormData>({
     resolver: zodResolver(contentSchema),
     defaultValues: {
       contentType: "",
-      imageUrl: "",
       content: "",
       date: "",
       time: "",
@@ -93,7 +96,6 @@ export const AddContentModal = ({
     if (editingContent) {
       form.reset({
         contentType: editingContent.contentType,
-        imageUrl: editingContent.imageUrl || "",
         content: editingContent.content,
         date: editingContent.date,
         time: editingContent.time,
@@ -103,21 +105,29 @@ export const AddContentModal = ({
           premium: editingContent.userType === "premium",
         },
       });
+      if (editingContent.imageUrl) {
+        setImagePreviewUrl(editingContent.imageUrl);
+      }
     } else {
-      form.reset({
-        contentType: "",
-        imageUrl: "",
-        content: "",
-        date: "",
-        time: "",
-        userTypes: {
-          all: false,
-          free: false,
-          premium: false,
-        },
-      });
+      form.reset();
+      setImageFile(null);
+      setImagePreviewUrl(null);
     }
   }, [editingContent, form]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setImageFile(file);
+      setImagePreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    setImageFile(null);
+    setImagePreviewUrl(null);
+  };
 
   const onSubmit = (data: ContentFormData) => {
     const userType = data.userTypes.all
@@ -133,12 +143,13 @@ export const AddContentModal = ({
       time: data.time,
       status: "pending",
       contentType: data.contentType,
-      imageUrl: data.imageUrl,
-      userType: userType as "all" | "free" | "premium",
+      imageUrl: imagePreviewUrl || undefined,
+      userType,
     };
 
     onSave(contentData);
     form.reset();
+    handleRemoveImage();
   };
 
   return (
@@ -177,27 +188,43 @@ export const AddContentModal = ({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Upload Image/Icon</FormLabel>
-                  <FormControl>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+            {/* Image Upload Section */}
+            <FormItem>
+              <FormLabel>Upload Image/Icon</FormLabel>
+              <FormControl>
+                <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                  {imagePreviewUrl ? (
+                    <>
+                      <img
+                        src={imagePreviewUrl}
+                        alt="Preview"
+                        className="mx-auto max-h-48"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="mt-2 text-sm text-red-500"
+                        variant="ghost"
+                      >
+                        Remove
+                      </Button>
+                    </>
+                  ) : (
+                    <>
                       <Input
-                        type="url"
-                        placeholder="Enter image URL or upload file"
-                        {...field}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
                         className="border-0 text-center"
                       />
-                      <p className="text-sm text-gray-500 mt-2">No image</p>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <p className="text-sm text-gray-500 mt-2">
+                        No image selected
+                      </p>
+                    </>
+                  )}
+                </div>
+              </FormControl>
+            </FormItem>
 
             <FormField
               control={form.control}
@@ -225,13 +252,12 @@ export const AddContentModal = ({
                   <FormItem>
                     <FormLabel>Select Date</FormLabel>
                     <FormControl>
-                      <Input type="date" placeholder="mm/dd/yyyy" {...field} />
+                      <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="time"
@@ -239,7 +265,7 @@ export const AddContentModal = ({
                   <FormItem>
                     <FormLabel>Select Time</FormLabel>
                     <FormControl>
-                      <Input type="time" placeholder="--:--:--" {...field} />
+                      <Input type="time" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -250,57 +276,32 @@ export const AddContentModal = ({
             <div className="space-y-3">
               <FormLabel>User Type</FormLabel>
               <div className="flex space-x-6">
-                <FormField
-                  control={form.control}
-                  name="userTypes.all"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>All User</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="userTypes.free"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Free Plan User</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="userTypes.premium"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Premium User</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+                {(["all", "free", "premium"] as const).map((key) => (
+                  <FormField
+                    key={key}
+                    control={form.control}
+                    name={`userTypes.${key}`}
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="capitalize">
+                            {key === "all"
+                              ? "All User"
+                              : key === "free"
+                              ? "Free Plan User"
+                              : "Premium User"}
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                ))}
               </div>
               <FormMessage />
             </div>

@@ -1,8 +1,11 @@
+"use client";
 import { Input, Pagination } from "antd";
 import { Button } from "@/components/ui/button";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
 import { Search } from "lucide-react";
 import ManageContentDataCard from "./ManageContentDataCard";
+import { AddContentModal } from "./AddContentModal";
+import { useState } from "react";
 
 interface PromptData {
   id: string;
@@ -18,6 +21,7 @@ interface PromptGridProps {
 }
 
 const Advertisements = ({ prompts, onEdit }: PromptGridProps) => {
+  const [openAddContent, setOpenAddContent] = useState(false);
   return (
     <div className="space-y-1">
       {/* ------------------------------ Add New Content Type ------------------------------ */}
@@ -57,6 +61,7 @@ const Advertisements = ({ prompts, onEdit }: PromptGridProps) => {
       <div className="w-fit ml-auto">
         <Pagination defaultCurrent={1} total={50} />
       </div>
+      <AddContentModal isOpen={openAddContent} onClose={() => setOpenAddContent(false)} onSave={() => {}}></AddContentModal>
     </div>
   );
 };

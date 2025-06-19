@@ -4,7 +4,7 @@ import EarningTable from "./_components/EarningTable";
 
 const EarningPage = () => {
   return (
-    <div className="lg:space-y-5 space-y-3 ">
+    <div className="space-y-1 ">
       <EarningStatContainer />
       <EarningTable />
     </div>

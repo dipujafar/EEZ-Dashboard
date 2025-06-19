@@ -1,55 +1,47 @@
 "use client";
-import {
-  Image,
-  Input,
-  message,
-  Popconfirm,
-  PopconfirmProps,
-  TableProps,
-} from "antd";
-// import UserDetails from "./UserDetails";
-import { useState } from "react";
+import { Image, Input, TableProps } from "antd";
 import DataTable from "@/utils/DataTable";
-import { CgUnblock } from "react-icons/cg";
-import { Eye, Search } from "lucide-react";
-import EarningDetailsModal from "@/components/(adminDashboard)/earning/EarningDetailsModal";
+import { ArrowDownNarrowWide, Search } from "lucide-react";
 
 type TDataType = {
   key?: number;
   serial: number;
-  name: string;
+  providerName: string;
   email: string;
   amount: number;
   date: string;
+  subscription_type: "Basic" | "Premium";
 };
 const data: TDataType[] = Array.from({ length: 18 }).map((data, inx) => ({
   key: inx,
   serial: inx + 1,
-  name: "Robert Fox",
+  providerName: "Anita@123",
   email: "robert@gmail.com",
   amount: 100,
   date: "19 Jun 2025",
   type: "User",
+  subscription_type: inx % 2 === 0 ? "Premium" :  "Basic",
 }));
 
 
 
 const EarningTable = () => {
-  const [open, setOpen] = useState(false);
 
   const columns: TableProps<TDataType>["columns"] = [
     {
       title: "Serial",
       dataIndex: "serial",
+      align: "center",
       render: (text) => <p>#{text}</p>,
     },
     {
-      title: "User Name",
-      dataIndex: "name",
+      title: "Provider Name",
+      dataIndex: "providerName",
+      align: "center",
       render: (text, record) => (
-        <div className="flex items-center gap-x-1">
+        <div className="flex justify-center items-center gap-x-1">
           <Image
-            src={"/user_image1.png"}
+            src={"/hr-image.png"}
             alt="profile-picture"
             width={40}
             height={40}
@@ -62,43 +54,53 @@ const EarningTable = () => {
     {
       title: "Email",
       dataIndex: "email",
+      align: "center",
+    },
+    {
+      title: "Subscription Type",
+      dataIndex: "subscription_type",
+      align: "center",
+        filters: [
+        {
+          text: "Basic",
+          value: "Basic",
+        },
+        {
+          text: "Premium",
+          value: "Premium",
+        },
+      ],
+      filterIcon: () => <ArrowDownNarrowWide color="#fff" />,
+      onFilter: (value, record) => record.subscription_type.indexOf(value as string) === 0,
     },
 
     {
       title: "Amount",
       dataIndex: "amount",
+      align: "center",
       render: (text) => <p>${text}</p>,
     },
     {
-      title: "Date",
+      title: " Purchase Date",
       dataIndex: "date",
+      align: "center",
     },
 
-    {
-      title: "Action",
-      dataIndex: "action",
-      render: () => (
-        <Eye
-          size={22}
-          color="#5C5C5C"
-          onClick={() => setOpen(!open)}
-        />
-      ),
-    },
+   
   ];
 
   return (
     <div className="bg-[#F9F9FA] rounded-md">
       <div className="flex justify-between items-center px-3 py-5">
-        <h1></h1>
+      
         <Input
-          className="!w-[180px] lg:!w-[250px] !py-2 placeholder:text-white !border-none !bg-[#ECECEC]"
+          className="md:!min-w-[280px] lg:!w-[250px] !py-2 placeholder:text-white !border-none !bg-[#dbdbdb]"
           placeholder="Search..."
           prefix={<Search size={16} color="#000"></Search>}
         ></Input>
       </div>
       <DataTable columns={columns} data={data} pageSize={11}></DataTable>
-      <EarningDetailsModal open={open} setOpen={setOpen}></EarningDetailsModal>
+
     </div>
   );
 };

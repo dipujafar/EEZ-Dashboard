@@ -65,7 +65,7 @@ const NotificationContainer = () => {
         <div className="xl:mt-8 mt-6 xl:px-10 px-6 text-text-color">
           <div className="flex gap-x-3 mb-3">
             <h5 className="font-medium text-2xl">Today</h5>
-            <div className="size-9 bg-main-color  rounded-full flex justify-center items-center text-lg">
+            <div className="size-9 bg-main-color  rounded-full flex justify-center items-center text-lg text-white">
               {notificationData?.today?.length}
             </div>
           </div>
@@ -98,7 +98,7 @@ const NotificationContainer = () => {
         <div className="xl:mt-8 mt-6 xl:px-10 px-6 text-text-color">
           <div className="flex gap-x-3 mb-3">
             <h5 className="font-medium text-2xl">Yesterday</h5>
-            <div className="size-9 bg-main-color  rounded-full flex justify-center items-center text-lg">
+            <div className="size-9 bg-main-color  rounded-full flex justify-center items-center text-lg text-white">
               {notificationData?.yesterday?.length}
             </div>
           </div>
