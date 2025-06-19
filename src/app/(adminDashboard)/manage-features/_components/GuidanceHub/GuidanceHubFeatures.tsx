@@ -19,7 +19,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "antd";
+import { Input, message, Popconfirm, PopconfirmProps } from "antd";
 import { useState } from "react";
 import AddCategoriesScenariosModal from "./AddCategoriesScenariosModal";
 
@@ -149,9 +149,14 @@ export default function GuidanceHubFeatures() {
     console.log(`Item ${itemId} in card ${cardId} changed to: ${checked}`);
   };
 
+  const confirmBlock: PopconfirmProps["onConfirm"] = (e) => {
+    console.log(e);
+    message.success("Successfully deleted.");
+  };
+
   return (
     <div className=" bg-gray-50 ">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
         {workplaceData.map((card) => {
           const IconComponent = iconMap[card.icon as keyof typeof iconMap];
 
@@ -167,11 +172,19 @@ export default function GuidanceHubFeatures() {
                   </div>
                   <h3 className="font-semibold text-black/50">{card.title}</h3>
                   {card.hasAlert && (
-                    <div className="ml-auto">
-                      <div className="size-7 flex justify-center items-center bg-red-500 rounded-full cursor-pointer">
-                        <Trash2 size={18} className="text-white" />
+                    <Popconfirm
+                      title="Are you sure?"
+                      description="You want delete this feature?"
+                      onConfirm={confirmBlock}
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      <div className="ml-auto">
+                        <div className="size-7 flex justify-center items-center bg-red-500 rounded-full cursor-pointer">
+                          <Trash2 size={18} className="text-white" />
+                        </div>
                       </div>
-                    </div>
+                    </Popconfirm>
                   )}
                 </div>
               </CardHeader>
@@ -218,7 +231,10 @@ export default function GuidanceHubFeatures() {
           );
         })}
       </div>
-      <AddCategoriesScenariosModal open={openEditModal} setOpen={setOpenEditModal} />
+      <AddCategoriesScenariosModal
+        open={openEditModal}
+        setOpen={setOpenEditModal}
+      />
     </div>
   );
 }

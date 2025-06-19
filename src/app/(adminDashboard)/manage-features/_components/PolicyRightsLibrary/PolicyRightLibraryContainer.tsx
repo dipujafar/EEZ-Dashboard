@@ -4,22 +4,23 @@ import DataTable from "@/utils/DataTable";
 import { Input, TableProps } from "antd";
 import { CirclePlus, Eye, Search, Trash2 } from "lucide-react";
 import React from "react";
-import AddTemplatesModal from "./AddTemplatesModal";
+import AddPolicyRightsLibraryModal from "./AddPolicyRightsLibraryModal";
 
 type TDataType = {
   key?: number;
   serial: string;
-  template_name: string;
+  policy_name: string;
   date: string;
 };
 
-const CommunicationToolkitContainer = () => {
+const PolicyRightLibraryContainer = () => {
   const [isAddTemplateOpen, setIsOpenAddTemplateModal] = React.useState(false);
+  const [isDetails, setIsDetails] = React.useState(false);
 
   const data: TDataType[] = Array.from({ length: 6 }).map((data, inx) => ({
     key: inx,
     serial: `# ${inx + 1}`,
-    template_name: "Requesting a meeting",
+    policy_name: "Fair Labor Standards Act (FLSA)",
     date: "11 Feb, 2025",
   }));
 
@@ -30,8 +31,8 @@ const CommunicationToolkitContainer = () => {
       align: "center",
     },
     {
-      title: "Template name",
-      dataIndex: "template_name",
+      title: "Policy name",
+      dataIndex: "policy_name",
       align: "center",
     },
 
@@ -48,7 +49,10 @@ const CommunicationToolkitContainer = () => {
         <div className="flex gap-x-2">
           {" "}
           <Eye
-            onClick={() => setIsOpenAddTemplateModal(true)}
+            onClick={() => {
+              setIsOpenAddTemplateModal(true);
+              setIsDetails(true);
+            }}
             size={20}
             color="#78C0A8"
           />{" "}
@@ -78,18 +82,19 @@ const CommunicationToolkitContainer = () => {
             }}
             className="w-full group"
           >
-            <CirclePlus /> Add Templates
+            <CirclePlus /> Add Policy & Rights Library
           </Button>
         </div>
       </div>
 
       <DataTable columns={columns} data={data}></DataTable>
-      <AddTemplatesModal
+      <AddPolicyRightsLibraryModal
         open={isAddTemplateOpen}
         setOpen={setIsOpenAddTemplateModal}
+       
       />
     </div>
   );
 };
 
-export default CommunicationToolkitContainer;
+export default PolicyRightLibraryContainer;

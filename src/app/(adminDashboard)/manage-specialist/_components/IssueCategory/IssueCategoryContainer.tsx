@@ -1,23 +1,32 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import DataTable from "@/utils/DataTable";
-import { Input, TableProps } from "antd";
+import { Input, message, Popconfirm, PopconfirmProps, TableProps } from "antd";
 import { CirclePlus, Search, Trash2 } from "lucide-react";
 import React from "react";
-import AddTagSuggestion from "./AddTagSuggestion";
+import AddIssueCategoryModal from "./AddIssueCategoryModal";
+
+
+  const confirmBlock: PopconfirmProps["onConfirm"] = (e) => {
+    console.log(e);
+    message.success("Blocked the user");
+  };
 
 type TDataType = {
   key?: number;
   serial: string;
-  tag: string;
+  issue_category: string;
   date: string;
 };
 const data: TDataType[] = Array.from({ length: 6 }).map((data, inx) => ({
   key: inx,
   serial: `# ${inx + 1}`,
-  tag: "Harrasment",
+  issue_category: "Harrasment",
   date: "11 Feb, 2025",
 }));
+
+
+
 
 const columns: TableProps<TDataType>["columns"] = [
   {
@@ -26,8 +35,8 @@ const columns: TableProps<TDataType>["columns"] = [
     align: "center",
   },
   {
-    title: "Suggested Tag",
-    dataIndex: "tag",
+    title: "Issue Category",
+    dataIndex: "issue_category",
     align: "center",
   },
 
@@ -40,11 +49,22 @@ const columns: TableProps<TDataType>["columns"] = [
   {
     title: "Action",
     dataIndex: "action",
-    render: () => <Trash2 className="text-red-500 cursor-pointer" size={20} />,
+    render: () => (
+      <Popconfirm
+        title="Are you sure?"
+        description="You want delete this category?"
+        onConfirm={confirmBlock}
+        okText="Yes"
+        cancelText="No"
+      >
+        {" "}
+        <Trash2 className="text-red-500 cursor-pointer" size={20} />
+      </Popconfirm>
+    ),
   },
 ];
 
-const WorkplaceJournalContainer = () => {
+const IssueCategoryContainer = () => {
   const [isAddTagSuggestionOpen, setIsOpenSuggestionOpen] =
     React.useState(false);
   return (
@@ -68,13 +88,13 @@ const WorkplaceJournalContainer = () => {
             }}
             className="w-full group"
           >
-            <CirclePlus /> Add New Tag Suggestion
+            <CirclePlus /> Add New Issue Category
           </Button>
         </div>
       </div>
 
       <DataTable columns={columns} data={data}></DataTable>
-      <AddTagSuggestion
+      <AddIssueCategoryModal
         open={isAddTagSuggestionOpen}
         setOpen={setIsOpenSuggestionOpen}
       />
@@ -82,4 +102,4 @@ const WorkplaceJournalContainer = () => {
   );
 };
 
-export default WorkplaceJournalContainer;
+export default IssueCategoryContainer;

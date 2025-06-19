@@ -1,15 +1,22 @@
-"use client";
 import { Button } from "@/components/ui/button";
+import { Input } from "antd";
 import { CirclePlus, Search } from "lucide-react";
 import React from "react";
-import GuidanceHubFeatures from "./GuidanceHubFeatures";
-import AddCategoriesScenariosModal from "./AddCategoriesScenariosModal";
-import { Input, Pagination } from "antd";
+import HRServices from "./HRServices";
+import Link from "next/link";
 
-const GuidanceHub = () => {
-  const [isOpenAddCategories, setIsOpenAddCategories] = React.useState(false);
+const HRServiceContainer = () => {
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
+      <div
+        style={{ boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.04)" }}
+        className="p-6 bg-white rounded-lg"
+      >
+        <h6>Total Specialist</h6>
+        <h4 className="text-3xl font-bold">20</h4>
+      </div>
+
+      {/*  ++++++++++++++++++++++ search option and add new hr service +++++++++++++++++++++     */}
       <div className="flex flex-col lg:flex-row gap-2  justify-between">
         <div className="flex-1">
           <Input
@@ -20,8 +27,8 @@ const GuidanceHub = () => {
         </div>
         {/* ---------------- Add Categories & Scenarios ---------------- */}
         <div className="flex-1">
+            <Link href={"/manage-specialist/add-hr-service"}>
           <Button
-            onClick={() => setIsOpenAddCategories(true)}
             style={{
               background:
                 "linear-gradient(180deg, #4E9DA6 0.89%, #1A2935 100.89%)",
@@ -29,21 +36,16 @@ const GuidanceHub = () => {
             }}
             className="w-full group"
           >
-            <CirclePlus /> Add Categories & Scenarios
+            <CirclePlus /> Add New HR Service
           </Button>
+          </Link>
         </div>
       </div>
-      <GuidanceHubFeatures />
 
-      <div className="w-fit ml-auto">
-        <Pagination defaultCurrent={1} total={50} />
-      </div>
-      <AddCategoriesScenariosModal
-        open={isOpenAddCategories}
-        setOpen={setIsOpenAddCategories}
-      />
+      {/* ++++++++++++++++++++++ hr service data +++++++++++++++++++++ */}
+      <HRServices />
     </div>
   );
 };
 
-export default GuidanceHub;
+export default HRServiceContainer;

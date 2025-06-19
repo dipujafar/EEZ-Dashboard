@@ -2,6 +2,9 @@
 import { Tabs } from "antd";
 import GuidanceHub from "./GuidanceHub/GuidanceHub";
 import WorkplaceJournalContainer from "./WorkplaceJournal/WorkplaceJournalContainer";
+import CommunicationToolkitContainer from "./CommunicationToolkit/CommunicationToolkitContainer";
+import PolicyRightLibraryContainer from "./PolicyRightsLibrary/PolicyRightLibraryContainer";
+import JobSearchHelpContainer from "./JobSearchHelp/JobSearchHelpContainer";
 
 const tabData = [
   {
@@ -12,22 +15,22 @@ const tabData = [
   {
     label: "Workplace Journal",
     key: "2",
-    children: <WorkplaceJournalContainer/>,
+    children: <WorkplaceJournalContainer />,
   },
   {
     label: "Communication Toolkit",
     key: "3",
-    children: "Communication Toolkit",
+    children: <CommunicationToolkitContainer />,
   },
   {
     label: "Policy & Rights Library",
     key: "4",
-    children: "Policy & Rights Library",
+    children: <PolicyRightLibraryContainer />,
   },
   {
     label: "Job Search Help",
     key: "5",
-    children: "Job Search Help",
+    children: <JobSearchHelpContainer />,
   },
 ];
 

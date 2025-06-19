@@ -1,8 +1,4 @@
-"use client";
-
-import type React from "react";
-
-import { useState } from "react";
+"use client";;
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, HelpCircle, Upload, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -26,7 +22,7 @@ import { RiCloseLargeLine } from "react-icons/ri";
 
 // Validation schema
 const formSchema = z.object({
-  suggestedTag: z.string().min(1, "Suggested tag name is required"),
+  issue_category: z.string().min(1, "Suggested tag name is required"),
 
   scenarios: z
     .array(
@@ -46,7 +42,7 @@ interface Scenario {
   text: string;
   checked: boolean;
 }
-const AddTagSuggestion = ({
+const AddIssueCategoryModal = ({
   open,
   setOpen,
 }: {
@@ -56,7 +52,7 @@ const AddTagSuggestion = ({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      suggestedTag: "",
+      issue_category: "",
       scenarios: [
         { id: "1", text: "Harassment", checked: true },
         {
@@ -129,11 +125,11 @@ const AddTagSuggestion = ({
                   {/*  Suggested Tag  Section */}
                   <FormField
                     control={form.control}
-                    name="suggestedTag"
+                    name="issue_category"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">
-                          Suggested Tag
+                          Issue category
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -225,4 +221,4 @@ const AddTagSuggestion = ({
   );
 };
 
-export default AddTagSuggestion;
+export default AddIssueCategoryModal;

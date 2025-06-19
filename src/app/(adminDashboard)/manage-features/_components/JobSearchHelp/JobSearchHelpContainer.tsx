@@ -4,22 +4,24 @@ import DataTable from "@/utils/DataTable";
 import { Input, TableProps } from "antd";
 import { CirclePlus, Eye, Search, Trash2 } from "lucide-react";
 import React from "react";
-import AddTemplatesModal from "./AddTemplatesModal";
+import AddJobSearchHelp from "./AddJobSearchHelp";
+
 
 type TDataType = {
   key?: number;
   serial: string;
-  template_name: string;
+  help_name: string;
   date: string;
 };
 
-const CommunicationToolkitContainer = () => {
+const JobSearchHelpContainer = () => {
   const [isAddTemplateOpen, setIsOpenAddTemplateModal] = React.useState(false);
+  const [isDetails, setIsDetails] = React.useState(false);
 
   const data: TDataType[] = Array.from({ length: 6 }).map((data, inx) => ({
     key: inx,
     serial: `# ${inx + 1}`,
-    template_name: "Requesting a meeting",
+    help_name: "Resume tips",
     date: "11 Feb, 2025",
   }));
 
@@ -30,8 +32,8 @@ const CommunicationToolkitContainer = () => {
       align: "center",
     },
     {
-      title: "Template name",
-      dataIndex: "template_name",
+      title: "Help name",
+      dataIndex: "help_name",
       align: "center",
     },
 
@@ -48,7 +50,10 @@ const CommunicationToolkitContainer = () => {
         <div className="flex gap-x-2">
           {" "}
           <Eye
-            onClick={() => setIsOpenAddTemplateModal(true)}
+            onClick={() => {
+              setIsOpenAddTemplateModal(true);
+              setIsDetails(true);
+            }}
             size={20}
             color="#78C0A8"
           />{" "}
@@ -78,13 +83,13 @@ const CommunicationToolkitContainer = () => {
             }}
             className="w-full group"
           >
-            <CirclePlus /> Add Templates
+            <CirclePlus /> Add Job search Help
           </Button>
         </div>
       </div>
 
       <DataTable columns={columns} data={data}></DataTable>
-      <AddTemplatesModal
+      <AddJobSearchHelp
         open={isAddTemplateOpen}
         setOpen={setIsOpenAddTemplateModal}
       />
@@ -92,4 +97,4 @@ const CommunicationToolkitContainer = () => {
   );
 };
 
-export default CommunicationToolkitContainer;
+export default JobSearchHelpContainer;
