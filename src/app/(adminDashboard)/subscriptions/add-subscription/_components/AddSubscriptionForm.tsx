@@ -1,8 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { set, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -23,69 +22,134 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
-
-const formSchema = z
-  .object({
-    planName: z.string().min(1, "Plan name is required"),
-    cost: z
-      .string()
-      .min(1, "Cost is required")
-      .refine((val) => {
-        const num = Number.parseFloat(val.replace("$", ""));
-        return !isNaN(num) && num >= 0;
-      }, "Please enter a valid cost (0 or greater)"),
-    featuresPermissions: z
-      .string()
-      .min(1, "Features and permissions are required"),
-    planValidity: z.enum(["unlimited", "1month", "3month", "custom"]),
-    customMonths: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      if (data.planValidity === "custom" && !data.customMonths) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Custom months value is required when custom option is selected",
-      path: ["customMonths"],
-    }
-  );
-
-type FormValues = z.infer<typeof formSchema>;
+import { formSchema, FormValues } from "./FormShema";
+import {
+  useCreateSubscriptionMutation,
+  useSingleSubscriptionQuery,
+  useUpdateSubscriptionMutation,
+} from "@/redux/api/subscriptionAPi";
+import { toast } from "sonner";
+import LoadingSpin from "@/components/loading-spain";
+import { useSearchParams } from "next/navigation";
+import SkeletonSubscriptionForm from "./Skeleton";
+import { useEffect } from "react";
 
 export default function AddSubscriptionForm() {
+  const [createSubscription, { isLoading }] = useCreateSubscriptionMutation();
+  const [updateSubscription, { isLoading: isUpdateLoading }] =
+    useUpdateSubscriptionMutation();
+  const subscriptionId = useSearchParams().get("id") || "";
+  const { data: subscriptionData, isLoading: subscriptionLoading } =
+    useSingleSubscriptionQuery(subscriptionId, { skip: !subscriptionId });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      planName: "",
-      cost: "0.00",
+      planName: subscriptionData?.data?.title || "",
+      cost: "",
       featuresPermissions: "",
-      planValidity: "unlimited",
       customMonths: "",
     },
   });
 
-  function onSubmit(values: FormValues) {
-    console.log(values);
-    // Handle form submission here
+  const { setValue } = form;
+
+  // --------------------------------- submit form -------------------------------
+  async function onSubmit(values: FormValues) {
+    const customData = {
+      title: values.planName,
+      amount: values?.planValidity === "free" ? 0 : Number(values.cost),
+      durationType: values?.planValidity === "free" ? "free" : "monthly",
+      duration:
+        values?.planValidity === "custom"
+          ? Number(values?.customMonths)
+          : values?.planValidity === "free"
+          ? 0
+          : Number(values.planValidity),
+      description: values.featuresPermissions,
+      type: "premium",
+    };
+
+    //  -------------------------- if the subscription exists then update it ----------------------------
+    if (subscriptionId && subscriptionData?.data) {
+      try {
+        await updateSubscription({
+          id: subscriptionId,
+          data: customData,
+        }).unwrap();
+        toast.success("Plan updated successfully");
+        form.reset();
+      } catch (error: any) {
+        toast.error(error?.data?.message);
+      }
+      return;
+    }
+
+    // -------------------------- if the subscription does not exist then create it ----------------------------
+    try {
+      await createSubscription(customData).unwrap();
+      toast.success("Plan created successfully");
+      form.reset();
+    } catch (error: any) {
+      toast.error(error?.data?.message);
+    }
   }
 
-  function onCancel() {
-    form.reset();
+  // ------------------------------ set default values ------------------------------
+  useEffect(() => {
+    if (subscriptionData?.data) {
+      setValue("planName", subscriptionData?.data?.title);
+      setValue("cost", String(subscriptionData?.data?.amount));
+      setValue("planValidity", setDefaultSubscriptionDuration() as string);
+      setValue(
+        "customMonths",
+        (setDefaultSubscriptionDuration() === "custom"
+          ? String(subscriptionData?.data?.duration)
+          : "") as string
+      );
+      setValue("featuresPermissions", subscriptionData?.data?.description);
+    }
+  }, [subscriptionData?.data]);
+
+  // ------------------------------------------------------------------------------
+
+  // ---------------------------------------- show skeleton if loading -------------------------------
+
+  if (subscriptionId && subscriptionLoading) {
+    return <SkeletonSubscriptionForm />;
   }
+
+  const setDefaultSubscriptionDuration = () => {
+    if (subscriptionData?.data?.durationType === "free") {
+      return "free";
+    } else if (
+      subscriptionData?.data?.duration === 1 ||
+      subscriptionData?.data?.duration === 3
+    ) {
+      return `${subscriptionData?.data?.duration}`;
+    } else if (
+      subscriptionData?.data &&
+      (subscriptionData?.data?.duration !== 1 ||
+        subscriptionData?.data?.duration !== 3)
+    ) {
+      return "custom";
+    } else {
+      return null;
+    }
+  };
 
   return (
-    <div className="">
+    <div>
       <div>
         <Card>
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
-              Subscription Plan Editor
+              {subscriptionId
+                ? "Subscription Plan Editor"
+                : "Add Subscription Plan"}
             </CardTitle>
             <CardDescription>
-              Configure plan details, features, and pricing
+              Configure plan details and pricing
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -96,7 +160,7 @@ export default function AddSubscriptionForm() {
               >
                 {/* Plan Information Section */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-gray-900">
+                  <h3 className="text-sm font-semibold text-gray-900">
                     Plan Information
                   </h3>
 
@@ -189,34 +253,33 @@ export default function AddSubscriptionForm() {
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            defaultValue={
+                              setDefaultSubscriptionDuration() || field.value
+                            }
                             className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
                           >
                             <div className="flex items-center space-x-2">
-                              <RadioGroupItem
-                                value="unlimited"
-                                id="unlimited"
-                              />
+                              <RadioGroupItem value="free" id="free" />
                               <label
-                                htmlFor="unlimited"
+                                htmlFor="free"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
-                                Unlimited
+                                Free
                               </label>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="1month" id="1month" />
+                              <RadioGroupItem value="1" id="1" />
                               <label
-                                htmlFor="1month"
+                                htmlFor="1"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
                                 1 Month
                               </label>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="3month" id="3month" />
+                              <RadioGroupItem value="3" id="3" />
                               <label
-                                htmlFor="3month"
+                                htmlFor="3"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
                                 3 Month
@@ -263,6 +326,7 @@ export default function AddSubscriptionForm() {
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-end">
                   <Button
+                    disabled={isLoading || isUpdateLoading}
                     style={{
                       background:
                         "linear-gradient(180deg, #4E9DA6 0.89%, #1A2935 100.89%)",
@@ -271,8 +335,8 @@ export default function AddSubscriptionForm() {
                     type="submit"
                     className="w-full bg-teal-600 hover:bg-teal-700 group"
                   >
-                    Submit
-                    <AnimatedArrow />
+                    {subscriptionId ? "Update" : "Submit"}
+                    {isLoading ? <LoadingSpin /> : <AnimatedArrow />}
                   </Button>
                 </div>
               </form>

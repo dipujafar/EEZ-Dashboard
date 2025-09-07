@@ -14,14 +14,19 @@ export type TProduct = {
 }
 
 
-export type TActivityItem = {
+export type TUserDataType = {
   id: string;
-  type: 'order' | 'shipped' | 'product' | 'favorited' | 'rated' | 'discount' | 'inquiry';
-  activity: string;
-  order_id?: string;
-  product?: string;
-  time_ago: string;
-  details: string;
-  color: string;
-  icon: string;
-}
+  serial: number;
+  name: string;
+  email: string;
+  location: string;
+  date: string;
+  type: string;
+  profileImage: string;
+  contactNumber: string;
+  status: string;
+};
+
+
+
+

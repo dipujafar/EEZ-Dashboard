@@ -2,7 +2,7 @@ import CustomersTable from "./Components/CustomersTable";
 
 const CustomerPage = () => {
   return (
-    <div className=" ">
+    <div>
       <CustomersTable></CustomersTable>
     </div>
   );

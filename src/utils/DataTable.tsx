@@ -1,28 +1,40 @@
+"use client";
+import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams";
 import { Table } from "antd";
+import { useSearchParams } from "next/navigation";
 
 const DataTable = ({
   columns,
   data,
   pageSize,
+  total,
 }: {
   columns: any;
   data: any;
   pageSize?: number;
+  total?: number;
 }) => {
-  return pageSize ? (
+  const updateParams = useUpdateSearchParams();
+  const page = useSearchParams()?.get("page") || "1";
+  return (
     <Table
       columns={columns}
       dataSource={data}
-      pagination={{ pageSize: pageSize }}
+      pagination={
+        pageSize
+          ? {
+              pageSize,
+              defaultCurrent: Number(page) || 1,
+              total: total ?? data?.length,
+              onChange: (page, size) => {
+                updateParams({ page: page.toString(), limit: size.toString()});
+              },
+            }
+          : false
+      }
       scroll={{ x: "max-content" }}
-    ></Table>
-  ) : (
-    <Table
-      columns={columns}
-      dataSource={data}
-      pagination={false}
-      scroll={{ x: "max-content" }}
-    ></Table>
+      rowKey={(record) => record.id || record.key} // always good to add rowKey
+    />
   );
 };
 

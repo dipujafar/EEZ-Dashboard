@@ -1,12 +1,22 @@
-import { Avatar, Divider, Modal } from "antd";
+import { TUserDataType } from "@/types";
+import { Avatar, Modal } from "antd";
+import { useEffect, useState } from "react";
 import { RiCloseLargeLine } from "react-icons/ri";
 
 type TPropsType = {
   open: boolean;
   setOpen: (collapsed: boolean) => void;
+  data: TUserDataType | null;
 };
 
-const UserDetails = ({ open, setOpen }: TPropsType) => {
+const UserDetails = ({ open, setOpen, data }: TPropsType) => {
+  const [currentData, setCurrentData] = useState<TUserDataType | null>(null);
+
+  console.log(currentData);
+
+  useEffect(() => {
+    setCurrentData(data);
+  }, [data]);
   return (
     <Modal
       open={open}
@@ -33,27 +43,27 @@ const UserDetails = ({ open, setOpen }: TPropsType) => {
           </div>
         </div>
         <div className="w-fit mx-auto relative">
-          <Avatar src="/user_image1.png" size={150} />
+          <Avatar src={currentData?.profileImage} size={150} />
         </div>
         <div className="mt-10  ">
           <div className="flex justify-between bg-[#21424617] py-3 px-2 border-b ">
             <h4>User name </h4>
-            <p className="font-medium">James Tracy</p>
+            <p className="font-medium">{currentData?.name}</p>
           </div>
 
           <div className="flex justify-between py-3  px-2 border-b">
             <h4>Email </h4>
-            <p className="font-medium">muskantanaz@gmail.com</p>
+            <p className="font-medium">{currentData?.email}</p>
           </div>
 
           <div className="flex justify-between bg-[#21424617] py-3 px-2 border-b">
             <h4>Contact Number </h4>
-            <p className="font-medium">+880123456</p>
+            <p className="font-medium">{currentData?.contactNumber}</p>
           </div>
 
           <div className="flex justify-between py-3 px-2 border-b">
             <h4>Date of Join </h4>
-            <p className="font-medium">10 Jan, 2025</p>
+            <p className="font-medium">{currentData?.date}</p>
           </div>
 
           <div className="flex justify-between bg-[#21424617] py-3 px-2 border-b">

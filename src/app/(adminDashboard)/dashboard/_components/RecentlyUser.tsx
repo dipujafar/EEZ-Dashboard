@@ -1,39 +1,40 @@
 "use client";
-import { Image, message, Popconfirm, PopconfirmProps, TableProps } from "antd";
-
+import { Image, TableProps } from "antd";
 import { useState } from "react";
 import DataTable from "@/utils/DataTable";
-import { CgUnblock } from "react-icons/cg";
-import { ArrowDownNarrowWide, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import UserDetails from "@/components/(adminDashboard)/user/UserDetails";
+import { useGetAllUsersQuery } from "@/redux/api/usersApi";
+import moment from "moment";
+import { TUserDataType } from "@/types";
+import BlockUser from "@/components/shared/BlockUser";
 
-type TDataType = {
-  key?: number;
-  serial: number;
-  name: string;
-  email: string;
-  location: string;
-  date: string;
-  type: string;
-};
-const data: TDataType[] = Array.from({ length: 6 }).map((data, inx) => ({
-  key: inx,
-  serial: inx + 1,
-  name: "Muskan Tanaz",
-  email: "muskantanaz@gmail.com",
-  location: "Dhanmondi",
-  date: "19 Jun 2025",
-  type: "User",
-}));
-
-const confirmBlock: PopconfirmProps["onConfirm"] = (e) => {
-  console.log(e);
-  message.success("Blocked the user");
-};
 const RecentlyUser = () => {
   const [open, setOpen] = useState(false);
+  const { data: usersData, isLoading } = useGetAllUsersQuery({ limit: 5 });
+  const [currentData, setCurrentData] = useState<TUserDataType | null>(null);
 
-  const columns: TableProps<TDataType>["columns"] = [
+  // if(isLoading){
+
+  //   return <UserTableSkeleton />
+  // }
+
+  const data: TUserDataType[] = usersData?.data?.data?.map(
+    (data: any, inx: number) => ({
+      id: data?._id,
+      serial: inx + 1,
+      name: data?.profile?.firstName + " " + data?.profile?.lastName,
+      email: data?.email,
+      profileImage: data?.profile?.profileImage,
+      location: "Dhanmondi",
+      date: moment(data?.createdAt).format("ll"),
+      type: data?.role,
+      contactNumber: data?.profile?.contactNumber,
+      status: data?.status,
+    })
+  );
+
+  const columns: TableProps<TUserDataType>["columns"] = [
     {
       title: "Serial",
       dataIndex: "serial",
@@ -43,15 +44,15 @@ const RecentlyUser = () => {
     {
       title: "User Name",
       dataIndex: "name",
-      align: "center",
-      render: (text) => (
-        <div className="flex  justify-center items-center gap-x-1">
+
+      render: (text, record) => (
+        <div className="flex   items-center gap-x-2">
           <Image
-            src={"/user_image1.png"}
+            src={record?.profileImage}
             alt="profile-picture"
-            width={40}
-            height={40}
-            className="size-10"
+            width={42}
+            height={42}
+            className="size-16 rounded-full"
           ></Image>
           <p>{text}</p>
         </div>
@@ -66,11 +67,18 @@ const RecentlyUser = () => {
       title: "Account Type",
       dataIndex: "type",
       align: "center",
-    
+      render: (text, record) => (
+        <div className="flex justify-center items-center gap-x-2">
+          <p className="">{text}</p>{" "}
+          {record?.status === "blocked" && (
+            <p className="text-red-600 bg-gray-200 px-2 rounded">Blocked</p>
+          )}
+        </div>
+      ),
     },
 
     {
-      title: " Date",
+      title: "Join Date",
       dataIndex: "date",
       align: "center",
     },
@@ -79,23 +87,18 @@ const RecentlyUser = () => {
       title: "Action",
       dataIndex: "action",
       align: "center",
-      render: () => (
+      render: (_, record) => (
         <div className="flex justify-center gap-2">
           <Eye
             size={22}
             color="#78C0A8"
-            onClick={() => setOpen(!open)}
+            onClick={() => {
+              setOpen(!open);
+              setCurrentData(record);
+            }}
             className="cursor-pointer"
           />
-          <Popconfirm
-            title="Block the user"
-            description="Are you sure to block this user?"
-            onConfirm={confirmBlock}
-            okText="Yes"
-            cancelText="No"
-          >
-            <CgUnblock size={22} color="#CD0335" />
-          </Popconfirm>
+          <BlockUser id={record?.id as string} status={record?.status} />
         </div>
       ),
     },
@@ -107,7 +110,11 @@ const RecentlyUser = () => {
         Recent Users
       </h1>
       <DataTable columns={columns} data={data}></DataTable>
-      <UserDetails open={open} setOpen={setOpen}></UserDetails>
+      <UserDetails
+        open={open}
+        setOpen={setOpen}
+        data={currentData}
+      ></UserDetails>
     </div>
   );
 };

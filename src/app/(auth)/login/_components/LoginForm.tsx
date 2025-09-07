@@ -1,9 +1,15 @@
 "use client";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
+import { Error_Modal } from "@/modals";
+import { useLoginMutation } from "@/redux/api/authApi";
+import { useAppDispatch } from "@/redux/hooks";
 import type { FormProps } from "antd";
 import { Button, Checkbox, Form, Input, Flex } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { setUser } from "@/redux/features/authSlice";
+import { jwtDecode } from "jwt-decode";
+import { toast } from "sonner";
 
 type FieldType = {
   email?: string;
@@ -17,10 +23,28 @@ const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
 
 const LoginForm = () => {
   const route = useRouter();
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useAppDispatch();
 
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-    console.log("Success:", values);
-    route.push("/dashboard");
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    try {
+      const formattedValues = {
+        email: values.email,
+        password: values.password,
+      };
+
+      const res = await login(formattedValues).unwrap();
+      dispatch(
+        setUser({
+          user: jwtDecode(res?.data?.accessToken),
+          token: res?.data?.accessToken,
+        })
+      );
+      toast.success("Login Success", { duration: 1000 });
+      route.push("/dashboard");
+    } catch (error: any) {
+      Error_Modal({ title: error?.data?.message });
+    }
   };
 
   return (
@@ -71,6 +95,7 @@ const LoginForm = () => {
           background: "linear-gradient(180deg, #4DB6AC 0.89%, #1A2935 100.89%)",
           boxShadow: "7px 8px 4.7px 0px rgba(0, 0, 0, 0.08) inset",
         }}
+        disabled={isLoading}
         className="group"
         htmlType="submit"
         size="large"

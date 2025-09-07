@@ -1,60 +1,59 @@
 "use client";
-import {
-  Image,
-  Input,
-  message,
-  Popconfirm,
-  PopconfirmProps,
-  TableProps,
-} from "antd";
-// import UserDetails from "./UserDetails";
+import { Image, Input, TableProps } from "antd";
 import { useState } from "react";
 import DataTable from "@/utils/DataTable";
-import { CgUnblock } from "react-icons/cg";
-import {
-  ArrowDownNarrowWide,
-  ArrowDownWideNarrowIcon,
-  EllipsisVertical,
-  Eye,
-  Search,
-} from "lucide-react";
+import { ArrowDownNarrowWide, Eye, Search } from "lucide-react";
 import UserDetails from "@/components/(adminDashboard)/user/UserDetails";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
-type TDataType = {
-  key?: number;
-  serial: number;
-  name: string;
-  email: string;
-  date: string;
-  type: string;
-};
-const data: TDataType[] = Array.from({ length: 18 }).map((data, inx) => ({
-  key: inx,
-  serial: inx + 1,
-  name: "Muskan Tanaz",
-  email: "muskantanaz@gmail.com",
-  date: "19 Jun 2025",
-  type: "User",
-}));
-
-const confirmBlock: PopconfirmProps["onConfirm"] = (e) => {
-  console.log(e);
-  message.success("Blocked the user");
-};
+import { useGetAllUsersQuery } from "@/redux/api/usersApi";
+import { TUserDataType } from "@/types";
+import moment from "moment";
+import { useSearchParams } from "next/navigation";
+import { useDebounce } from "use-debounce";
+import BlockUser from "@/components/shared/BlockUser";
 
 const CustomersTable = () => {
   const [open, setOpen] = useState(false);
+  const [currentData, setCurrentData] = useState<TUserDataType | null>(null);
 
-  const columns: TableProps<TDataType>["columns"] = [
+  // ===================================== calling api with queries ============================
+  const page = useSearchParams().get("page") || "1";
+  const limit = useSearchParams().get("limit") || "11";
+  const [searchText, setSearchText] = useState("");
+  const [searchValue] = useDebounce(searchText, 500);
+  const queries: Record<string, string> = {};
+
+  if (page) queries.page = page;
+  if (limit) queries.limit = limit;
+
+  if (searchValue) queries.searchTerms = searchValue;
+
+  const { data: usersData, isLoading } = useGetAllUsersQuery(queries);
+
+  // ==================================================================================
+
+  // if(isLoading){
+
+  //   return <UserTableSkeleton />
+  // }
+
+  const data: TUserDataType[] = usersData?.data?.data?.map(
+    (data: any, inx: number) => ({
+      id: data?._id,
+      serial: inx + 1,
+      name: data?.profile?.firstName + " " + data?.profile?.lastName,
+      email: data?.email,
+      profileImage: data?.profile?.profileImage,
+      location: "Dhanmondi",
+      date: moment(data?.createdAt).format("ll"),
+      type: data?.role,
+      contactNumber: data?.profile?.contactNumber,
+      status: data?.status,
+    })
+  );
+
+  const columns: TableProps<TUserDataType>["columns"] = [
     {
-      title: "Customer ID",
+      title: "Serial",
       dataIndex: "serial",
       align: "center",
       render: (text) => <p>#{text}</p>,
@@ -62,15 +61,15 @@ const CustomersTable = () => {
     {
       title: "User Name",
       dataIndex: "name",
-      align: "center",
+
       render: (text, record) => (
-        <div className="flex items-center justify-center gap-x-1">
+        <div className="flex   items-center gap-x-2">
           <Image
-            src={"/user_image1.png"}
+            src={record?.profileImage}
             alt="profile-picture"
-            width={40}
-            height={40}
-            className="size-10"
+            width={42}
+            height={42}
+            className="size-16 rounded-full"
           ></Image>
           <p>{text}</p>
         </div>
@@ -81,19 +80,26 @@ const CustomersTable = () => {
       dataIndex: "email",
       align: "center",
     },
-
     {
       title: "Account Type",
       dataIndex: "type",
       align: "center",
+      render: (text, record) => (
+        <div className="flex justify-center items-center gap-x-2">
+          <p className="">{text}</p>{" "}
+          {record?.status === "blocked" && (
+            <p className="text-red-600 bg-gray-200 px-2 rounded">Blocked</p>
+          )}
+        </div>
+      ),
       filters: [
         {
-          text: "User",
-          value: "User",
+          text: "USER",
+          value: "USER",
         },
         {
-          text: "Admin",
-          value: "Admin",
+          text: "HR",
+          value: "HR",
         },
       ],
       filterIcon: () => <ArrowDownNarrowWide color="#fff" />,
@@ -101,7 +107,7 @@ const CustomersTable = () => {
     },
 
     {
-      title: "Date",
+      title: "Join Date",
       dataIndex: "date",
       align: "center",
     },
@@ -110,18 +116,18 @@ const CustomersTable = () => {
       title: "Action",
       dataIndex: "action",
       align: "center",
-      render: () => (
+      render: (_, record) => (
         <div className="flex justify-center gap-2">
-          <Eye size={22} color="#78C0A8" onClick={() => setOpen(!open)} />
-          <Popconfirm
-            title="Block the user"
-            description="Are you sure to block this user?"
-            onConfirm={confirmBlock}
-            okText="Yes"
-            cancelText="No"
-          >
-            <CgUnblock size={22} color="#CD0335" />
-          </Popconfirm>
+          <Eye
+            size={22}
+            color="#78C0A8"
+            onClick={() => {
+              setOpen(!open);
+              setCurrentData(record);
+            }}
+            className="cursor-pointer"
+          />
+          <BlockUser id={record?.id as string} status={record?.status} />
         </div>
       ),
     },
@@ -134,11 +140,21 @@ const CustomersTable = () => {
         <Input
           className="!w-[180px] lg:!w-[250px] !py-2 placeholder:text-white !border-none !bg-[#ECECEC]"
           placeholder="Search Users..."
+          onChange={(e) => setSearchText(e.target.value)}
           prefix={<Search size={16} color="#000"></Search>}
         ></Input>
       </div>
-      <DataTable columns={columns} data={data} pageSize={11}></DataTable>
-      <UserDetails open={open} setOpen={setOpen}></UserDetails>
+      <DataTable
+        columns={columns}
+        data={data}
+        pageSize={4}
+        total={usersData?.data?.meta?.total}
+      ></DataTable>
+      <UserDetails
+        open={open}
+        setOpen={setOpen}
+        data={currentData}
+      ></UserDetails>
     </div>
   );
 };
