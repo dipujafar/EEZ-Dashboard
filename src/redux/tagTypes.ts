@@ -3,7 +3,9 @@ export const tagTypes = {
   users: "Users",
   content: "Content",
   subscription: "Subscription",
-  hrAdmin : "HrAdmin"
+  hrAdmin: "HrAdmin",
+  earing: "Earning",
+  stat: "Stat",
 };
 
 export const tagTypesList = [
@@ -11,7 +13,7 @@ export const tagTypesList = [
   tagTypes.users,
   tagTypes.content,
   tagTypes.subscription,
-  tagTypes.hrAdmin
+  tagTypes.hrAdmin,
+  tagTypes.earing,
+  tagTypes.stat,
 ];
-
-

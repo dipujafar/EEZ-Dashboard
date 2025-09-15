@@ -1,10 +1,6 @@
 "use client";
 import { Card, CardTitle } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { ChevronDown } from "lucide-react";
 import {
@@ -13,8 +9,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { earningData } from "@/data";
 import { useState } from "react";
+import { useGetEarningsChartQuery } from "@/redux/api/chartApis";
+import EarningsOverviewSkeleton from "./EarningsOverviewSkeleton";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -38,11 +35,16 @@ const EarningsChart = ({ className }: EarningsChartProps) => {
   const currentYear = new Date().getFullYear();
   const lastFiveYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
   const [selectedYear, setSetSelectedYear] = useState(currentYear);
+  const { data, isLoading } = useGetEarningsChartQuery({ year: selectedYear });
+
+  console.log(data?.data?.monthlyData);
+
+  if (isLoading) return <EarningsOverviewSkeleton />;
 
   return (
     <Card className={`p-6 bg-[#F9F9FA] border-none rounded-2xl  ${className}`}>
       <div className="flex justify-between items-center mb-5">
-        <div className="flex-1 border-r-2 border-[#00000033]">
+        <div className="flex-1  border-[#00000033]">
           <CardTitle className="text-xl font-semibold flex items-center">
             Earnings Overview
           </CardTitle>
@@ -84,13 +86,13 @@ const EarningsChart = ({ className }: EarningsChartProps) => {
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-              data={earningData}
+              data={data?.data?.monthlyData}
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               className="h-[300px]"
             >
               <defs>
                 <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="20%" stopColor="#347172" opacity={0.9}  />
+                  <stop offset="20%" stopColor="#347172" opacity={0.9} />
                   <stop offset="80%" stopColor="#347172" stopOpacity={0.08} />
                 </linearGradient>
               </defs>
@@ -98,19 +100,25 @@ const EarningsChart = ({ className }: EarningsChartProps) => {
                 dataKey="month"
                 axisLine={false}
                 tickLine={false}
+                dy={10}
                 tick={{ fontSize: 12 }}
+                tickFormatter={(value: string) =>
+                  value?.charAt(0)?.toUpperCase() + value?.slice(1)
+                }
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12 }}
-                tickFormatter={(value) => `${value / 1000}k`}
+                tickMargin={10}
+
+                // tickFormatter={(value) => `${value / 1000}k`}
               />
               <ChartTooltip content={<CustomTooltip />} />
 
               <Area
                 type="monotone"
-                dataKey="expense"
+                dataKey="totalEarnings"
                 stroke="#00000066"
                 strokeWidth={1}
                 fillOpacity={1}

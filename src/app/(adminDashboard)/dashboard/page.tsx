@@ -1,6 +1,6 @@
-import EarningsChart from "./_components/EarningsChart";
+import EarningsChart from "./_components/EarningsChart/EarningsChart";
 import RecentlyUser from "./_components/RecentlyUser";
-import StatContainer from "./_components/StatContainer";
+import StatContainer from "./_components/StatContainer/StatContainer";
 import { UserOverview } from "./_components/UserOverview/UserOverview";
 
 const DashboardPage = () => {
