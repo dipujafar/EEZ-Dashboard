@@ -2,11 +2,7 @@ import TermsConditionsEditor from "@/components/(adminDashboard)/(setting)/Terms
 import React from "react";
 
 const TermsConditions = () => {
-  return (
-    <div>
-      <TermsConditionsEditor></TermsConditionsEditor>
-    </div>
-  );
+  return <TermsConditionsEditor></TermsConditionsEditor>;
 };
 
 export default TermsConditions;

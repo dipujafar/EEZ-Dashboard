@@ -2,11 +2,7 @@ import React from "react";
 import ManageSpecialistContainer from "./_components/ManageSpecialistContainer";
 
 const ManageSpecialistPage = () => {
-  return (
-    <div>
-      <ManageSpecialistContainer/>
-    </div>
-  );
+  return <ManageSpecialistContainer />;
 };
 
 export default ManageSpecialistPage;

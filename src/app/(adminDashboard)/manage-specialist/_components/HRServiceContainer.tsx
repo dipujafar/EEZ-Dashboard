@@ -1,11 +1,20 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "antd";
 import { CirclePlus, Search } from "lucide-react";
 import React from "react";
 import HRServices from "./HRServices";
 import Link from "next/link";
+import { useGetAllHrAdminsQuery } from "@/redux/api/hrAdminApi";
+import { HRServicesPageSkeleton } from "./skeleton/HRServiceSkeleton";
 
 const HRServiceContainer = () => {
+  const { data: hrAdminData, isLoading } = useGetAllHrAdminsQuery(undefined);
+
+  if (isLoading) {
+    return <HRServicesPageSkeleton />;
+  }
+
   return (
     <div className="space-y-3">
       <div
@@ -27,23 +36,23 @@ const HRServiceContainer = () => {
         </div>
         {/* ---------------- Add Categories & Scenarios ---------------- */}
         <div className="flex-1">
-            <Link href={"/manage-specialist/add-hr-service"}>
-          <Button
-            style={{
-              background:
-                "linear-gradient(180deg, #4E9DA6 0.89%, #1A2935 100.89%)",
-              boxShadow: " 7px 8px 4.7px 0px rgba(0, 0, 0, 0.08) inset",
-            }}
-            className="w-full group"
-          >
-            <CirclePlus /> Add New HR Service
-          </Button>
+          <Link href={"/manage-specialist/add-hr-service"}>
+            <Button
+              style={{
+                background:
+                  "linear-gradient(180deg, #4E9DA6 0.89%, #1A2935 100.89%)",
+                boxShadow: " 7px 8px 4.7px 0px rgba(0, 0, 0, 0.08) inset",
+              }}
+              className="w-full group"
+            >
+              <CirclePlus /> Add New HR Service
+            </Button>
           </Link>
         </div>
       </div>
 
       {/* ++++++++++++++++++++++ hr service data +++++++++++++++++++++ */}
-      <HRServices />
+      <HRServices data={hrAdminData?.data?.data} />
     </div>
   );
 };

@@ -141,16 +141,22 @@ const confirmBlock: PopconfirmProps["onConfirm"] = (e) => {
   message.success("Successfully deleted.");
 };
 
-export default function HRServices() {
+const randomColorPick = (index: number) => {
+  const color = Math.floor(Math.random() * 3000000 * index + 2).toString(16);
+  return "#" + color;
+};
+
+export default function HRServices({ data }: any) {
+  console.log(data);
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-7xl mx-auto">
-        {specialists.map((specialist) => (
+        {data?.map((specialist: any) => (
           <Card
             key={specialist.id}
             className="relative overflow-hidden hover:shadow-lg transition-shadow duration-200"
           >
-            <CardContent className="p-4 md:p-6 relative">
+            <CardContent className="p-4 md:p-6 relative flex flex-col h-full">
               <Popconfirm
                 title="Are you sure?"
                 description="You want delete this service?"
@@ -163,72 +169,84 @@ export default function HRServices() {
                 </div>
               </Popconfirm>
               {/* Profile Section */}
-              <div className="flex items-center gap-3 mb-4">
-                <div className="relative">
-                  <Image
-                    src={specialist.avatar || "/placeholder.svg"}
-                    alt={specialist.name}
-                    width={54}
-                    height={54}
-                    className="rounded-full object-cover"
-                  />
-                </div>
-                <div className="flex-1 space-y-0.5">
-                  <h3 className="font-semibold text-gray-900 truncate">
-                    {specialist.name}
-                  </h3>
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {specialist.tags.map((tag, index) => (
-                      <Badge
-                        key={index}
-                        className={`${tag.color} border-0 text-xs font-medium px-2 py-1 rounded-full`}
-                      >
-                        {tag.label}
-                      </Badge>
-                    ))}
+              <div className="">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="relative">
+                    <Image
+                      src={
+                        specialist?.user?.profile?.profileImage ||
+                        "/placeholder.svg"
+                      }
+                      alt={specialist.name}
+                      width={54}
+                      height={54}
+                      className="rounded-full size-12 object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-0.5">
+                    <h3 className="font-semibold text-gray-900 truncate">
+                      {specialist.name}
+                    </h3>
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {specialist?.expertise?.slice(0, 3)?.map((tag: any, index: number) => (
+                        <Badge
+                          key={index}
+                          style={{ backgroundColor: randomColorPick(index) }}
+                          className={`border-0 text-xs font-medium px-2 py-1 rounded-full`}
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
 
-                    <Badge
-                      className={`bg-[#FF7D00]/70 border-0 text-xs font-medium px-2 py-1 rounded-full`}
-                    >
-                      ...
-                    </Badge>
+                      {specialist?.expertise?.length > 3 && (
+                        <Badge
+                          className={`bg-[#FF7D00]/70 border-0 text-xs font-medium px-2 py-1 rounded-full`}
+                        >
+                          ...
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <hr />
+                <hr />
 
-              {/* Title */}
-              <div className="flex items-start gap-2 my-3">
-                <Briefcase className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {specialist.title}
-                </p>
-              </div>
+                {/* Title */}
+                <div className="flex items-start gap-2 my-3">
+                  <Briefcase className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {specialist?.description}
+                  </p>
+                </div>
 
-              {/* Date */}
-              <div className="flex items-center gap-2 mb-4">
-                <Calendar className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-500">{specialist.date}</span>
+                {/* Date */}
+                <div className="flex items-center gap-2 mb-4">
+                  <Calendar className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-500">
+                    {specialist.date}
+                  </span>
+                </div>
               </div>
 
               {/* Edit Button */}
-              <Link href={"/manage-specialist/add-hr-service"}>
-                <Button
-                  variant="outline"
-                  className="w-full justify-center gap-2 hover:bg-gray-50 text-[#4E9DA6] border-t-[#59b0ba] border-l-[#448b93] border-b-[#32656a] border-r-[#2a5256]"
-                >
-                  Edit
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
+              <div className="mt-auto">
+                <Link href={"/manage-specialist/add-hr-service"}>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center gap-2 hover:bg-gray-50 text-[#4E9DA6] border-t-[#59b0ba] border-l-[#448b93] border-b-[#32656a] border-r-[#2a5256]"
+                  >
+                    Edit
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-       <div className="w-fit ml-auto mt-5">
+      <div className="w-fit ml-auto mt-5">
         <Pagination defaultCurrent={1} total={50} />
       </div>
     </div>

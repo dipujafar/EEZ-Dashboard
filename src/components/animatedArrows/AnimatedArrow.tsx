@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
-import React from "react";
 
 const AnimatedArrow = ({ size, className }: { size?: number, className?: string }) => {
   return (

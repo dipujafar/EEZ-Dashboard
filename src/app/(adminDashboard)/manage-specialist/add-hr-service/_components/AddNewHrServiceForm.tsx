@@ -1,12 +1,10 @@
-"use client"
+"use client";
 import type React from "react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import { X, Upload, FileText, ImageIcon } from "lucide-react"
 import dynamic from "next/dynamic"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,51 +17,17 @@ import { Card, CardContent } from "@/components/ui/card"
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false })
 import "react-quill/dist/quill.snow.css"
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow"
+import { days, FormData, formSchema, times } from "./schema.utils"
 
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  profileImage: z.instanceof(File).optional(),
-  expertiseAreas: z.array(z.string()).min(1, "At least one expertise area is required"),
-  document: z.instanceof(File).optional(),
-  startDay: z.string().min(1, "Start day is required"),
-  endDay: z.string().min(1, "End day is required"),
-  startTime: z.string().min(1, "Start time is required"),
-  endTime: z.string().min(1, "End time is required"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-})
 
-type FormData = z.infer<typeof formSchema>
 
-const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-const times = [
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30",
-  "16:00",
-  "16:30",
-  "17:00",
-  "17:30",
-  "18:00",
-  "18:30",
-  "19:00",
-  "19:30",
-  "20:00",
-]
+
+
+
 
 export default function AddNewHrServiceForm() {
-  const router = useRouter()
+
   const [expertiseInput, setExpertiseInput] = useState("")
   const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null)
   const [selectedDocument, setSelectedDocument] = useState<File | null>(null)
@@ -416,7 +380,7 @@ export default function AddNewHrServiceForm() {
           />
 
           {/* Submit Button */}
-          <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 group">
+          <Button type="submit" className="w-full bg-main-color hover:bg-teal-700 text-white py-3 group">
             Save Changes <AnimatedArrow />
           </Button>
         </form>

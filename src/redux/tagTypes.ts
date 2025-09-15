@@ -6,6 +6,7 @@ export const tagTypes = {
   hrAdmin: "HrAdmin",
   earing: "Earning",
   stat: "Stat",
+  earningHistory: "EarningHistory",
 };
 
 export const tagTypesList = [
@@ -16,4 +17,6 @@ export const tagTypesList = [
   tagTypes.hrAdmin,
   tagTypes.earing,
   tagTypes.stat,
+  tagTypes.earningHistory,
+  tagTypes.hrAdmin,
 ];

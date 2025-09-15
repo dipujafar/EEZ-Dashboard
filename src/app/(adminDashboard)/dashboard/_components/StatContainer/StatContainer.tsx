@@ -1,13 +1,12 @@
 "use client";
+import { StatCardSkeleton } from "@/components/shardSkeleton/StatCardSkeleton";
 import { StatCard } from "@/components/shared/StatCard";
 import { EarningGrowthIcon, PeopleIcon } from "@/icons";
 import { useGetStatQuery } from "@/redux/api/statApi";
-import { StatCardSkeleton } from "./StatCardSkeleton";
+
 
 const StatContainer = () => {
   const { data, isLoading } = useGetStatQuery(undefined);
-
-  console.log(data?.data);
 
   if (isLoading)
     return (

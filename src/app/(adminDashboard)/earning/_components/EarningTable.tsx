@@ -2,6 +2,12 @@
 import { Image, Input, TableProps } from "antd";
 import DataTable from "@/utils/DataTable";
 import { ArrowDownNarrowWide, Search } from "lucide-react";
+import { useGetEarningHistoryQuery } from "@/redux/api/earningApi";
+import { useSearchParams } from "next/navigation";
+import { useDebounce } from "use-debounce";
+import { useState } from "react";
+import SubscriptionTableSkeleton from "./skeleton/SubscriptionSkeletonTable";
+import moment  from "moment";
 
 type TDataType = {
   key?: number;
@@ -10,22 +16,41 @@ type TDataType = {
   email: string;
   amount: number;
   date: string;
-  subscription_type: "Basic" | "Premium";
+  subscription_type: "basic" | "premium" | "advanced";
 };
-const data: TDataType[] = Array.from({ length: 18 }).map((data, inx) => ({
-  key: inx,
-  serial: inx + 1,
-  providerName: "Anita@123",
-  email: "robert@gmail.com",
-  amount: 100,
-  date: "19 Jun 2025",
-  type: "User",
-  subscription_type: inx % 2 === 0 ? "Premium" :  "Basic",
-}));
-
-
 
 const EarningTable = () => {
+  // ===================================== calling api with queries ============================
+  const page = useSearchParams().get("page") || "1";
+  const limit = useSearchParams().get("limit") || "11";
+  const [searchText, setSearchText] = useState("");
+  const [searchValue] = useDebounce(searchText, 500);
+  // ---------------------------- set queries ----------------------------
+  const queries: Record<string, string> = {};
+  if (page) queries.page = page;
+  if (limit) queries.limit = limit;
+  if (searchValue) queries.searchTerms = searchValue;
+
+  const { data: earningData, isLoading } = useGetEarningHistoryQuery(queries);
+
+  console.log(earningData?.data?.result);
+
+  if (isLoading) return <SubscriptionTableSkeleton />;
+
+  const data: TDataType[] = earningData?.data?.result?.map(
+    (data: any, inx: number) => ({
+      key: inx,
+      serial: inx + 1,
+      providerName:
+        data?.userId?.profile?.firstName +
+        " " +
+        data?.userId?.profile?.lastName,
+      email: data?.userId?.email,
+      amount: data?.amount,
+      date: moment(data?.createdAt).format("ll"),
+      subscription_type: data?.subscriptionId?.type,
+    })
+  );
 
   const columns: TableProps<TDataType>["columns"] = [
     {
@@ -37,9 +62,9 @@ const EarningTable = () => {
     {
       title: "Provider Name",
       dataIndex: "providerName",
-      align: "center",
+
       render: (text, record) => (
-        <div className="flex justify-center items-center gap-x-1">
+        <div className="flex  items-center gap-x-1">
           <Image
             src={"/hr-image.png"}
             alt="profile-picture"
@@ -54,24 +79,29 @@ const EarningTable = () => {
     {
       title: "Email",
       dataIndex: "email",
-      align: "center",
     },
     {
       title: "Subscription Type",
       dataIndex: "subscription_type",
       align: "center",
-        filters: [
+      render: (text) => <p className="capitalize">{text}</p>,
+      filters: [
         {
           text: "Basic",
-          value: "Basic",
+          value: "basic",
         },
         {
           text: "Premium",
-          value: "Premium",
+          value: "premium",
+        },
+        {
+          text: "Advanced",
+          value: "advanced",
         },
       ],
       filterIcon: () => <ArrowDownNarrowWide color="#fff" />,
-      onFilter: (value, record) => record.subscription_type.indexOf(value as string) === 0,
+      onFilter: (value, record) =>
+        record.subscription_type.indexOf(value as string) === 0,
     },
 
     {
@@ -85,22 +115,24 @@ const EarningTable = () => {
       dataIndex: "date",
       align: "center",
     },
-
-   
   ];
 
   return (
     <div className="bg-[#F9F9FA] rounded-md">
       <div className="flex justify-between items-center px-3 py-5">
-      
         <Input
           className="md:!min-w-[280px] lg:!w-[250px] !py-2 placeholder:text-white !border-none !bg-[#dbdbdb]"
           placeholder="Search..."
+          onChange={(e) => setSearchText(e.target.value)}
           prefix={<Search size={16} color="#000"></Search>}
         ></Input>
       </div>
-      <DataTable columns={columns} data={data} pageSize={11}></DataTable>
-
+      <DataTable
+        columns={columns}
+        data={data}
+        pageSize={14}
+        total={earningData?.data?.meta?.total}
+      ></DataTable>
     </div>
   );
 };

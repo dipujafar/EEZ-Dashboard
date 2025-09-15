@@ -1,3 +1,4 @@
+import { tagTypes } from "../tagTypes";
 import { baseApi } from "./baseApi";
 
 const hrAdminApi = baseApi.injectEndpoints({
@@ -7,7 +8,17 @@ const hrAdminApi = baseApi.injectEndpoints({
         url: "/hr-admin",
         method: "GET",
       }),
-      providesTags: ["HrAdmins"],
+      providesTags: [tagTypes.hrAdmin],
     }),
+    crateHrAdmin: builder.mutation({
+      query: (data) => ({
+        url: "/hr-admin",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: [tagTypes.hrAdmin],
+    })
   }),
 });
+
+export const { useGetAllHrAdminsQuery, useCrateHrAdminMutation } = hrAdminApi;
