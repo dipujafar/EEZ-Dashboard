@@ -5,136 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Calendar, Briefcase, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { message, Pagination, Popconfirm, PopconfirmProps } from "antd";
-
-interface Specialist {
-  id: number;
-  name: string;
-  avatar: string;
-  tags: Array<{
-    label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
-    color: string;
-  }>;
-  title: string;
-  date: string;
-}
-
-const specialists: Specialist[] = [
-  {
-    id: 1,
-    name: "Jessica Martinez",
-    avatar: "/hr-image.png",
-    tags: [
-      {
-        label: "Harassment",
-        variant: "default",
-        color: "bg-blue-100 text-blue-800",
-      },
-      {
-        label: "Conflict resolution",
-        variant: "secondary",
-        color: "bg-green-100 text-green-800",
-      },
-    ],
-    title: "Certified HR Advisor & Workplace Conflict Specialist",
-    date: "May 21, 2025",
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    avatar: "/hr-image.png",
-    tags: [
-      {
-        label: "Employee Relations",
-        variant: "default",
-        color: "bg-purple-100 text-purple-800",
-      },
-      {
-        label: "Mediation",
-        variant: "secondary",
-        color: "bg-orange-100 text-orange-800",
-      },
-    ],
-    title: "Senior HR Consultant & Employee Relations Expert",
-    date: "May 18, 2025",
-  },
-  {
-    id: 3,
-    name: "Sarah Johnson",
-    avatar: "/hr-image.png",
-    tags: [
-      {
-        label: "Workplace Safety",
-        variant: "default",
-        color: "bg-red-100 text-red-800",
-      },
-      {
-        label: "Compliance",
-        variant: "secondary",
-        color: "bg-yellow-100 text-yellow-800",
-      },
-    ],
-    title: "HR Compliance Officer & Safety Coordinator",
-    date: "May 15, 2025",
-  },
-  {
-    id: 4,
-    name: "David Rodriguez",
-    avatar: "/hr-image.png",
-    tags: [
-      {
-        label: "Training",
-        variant: "default",
-        color: "bg-indigo-100 text-indigo-800",
-      },
-      {
-        label: "Development",
-        variant: "secondary",
-        color: "bg-teal-100 text-teal-800",
-      },
-    ],
-    title: "Learning & Development Specialist",
-    date: "May 12, 2025",
-  },
-  {
-    id: 5,
-    name: "Emily Thompson",
-    avatar: "/hr-image.png",
-    tags: [
-      {
-        label: "Recruitment",
-        variant: "default",
-        color: "bg-pink-100 text-pink-800",
-      },
-      {
-        label: "Talent Acquisition",
-        variant: "secondary",
-        color: "bg-cyan-100 text-cyan-800",
-      },
-    ],
-    title: "Senior Talent Acquisition Manager",
-    date: "May 09, 2025",
-  },
-  {
-    id: 6,
-    name: "Robert Kim",
-    avatar: "/hr-image.png",
-    tags: [
-      {
-        label: "Benefits",
-        variant: "default",
-        color: "bg-lime-100 text-lime-800",
-      },
-      {
-        label: "Compensation",
-        variant: "secondary",
-        color: "bg-amber-100 text-amber-800",
-      },
-    ],
-    title: "Compensation & Benefits Analyst",
-    date: "May 06, 2025",
-  },
-];
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import moment from "moment";
 
 const confirmBlock: PopconfirmProps["onConfirm"] = (e) => {
   console.log(e);
@@ -170,44 +42,47 @@ export default function HRServices({ data }: any) {
               </Popconfirm>
               {/* Profile Section */}
               <div className="">
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center  gap-3 mb-4">
                   <div className="relative">
-                    <Image
-                      src={
-                        specialist?.user?.profile?.profileImage ||
-                        "/placeholder.svg"
-                      }
-                      alt={specialist.name}
-                      width={54}
-                      height={54}
-                      className="rounded-full size-12 object-cover"
-                    />
+                    <Avatar className="size-12">
+                      <AvatarImage
+                        src={specialist?.user?.profile?.profileImage}
+                        className="object-cover"
+                      />
+                      <AvatarFallback>
+                        {specialist?.user?.profile?.firstName?.charAt(0) +
+                          specialist?.user?.profile?.lastName?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
                   <div className="flex-1 space-y-0.5">
                     <h3 className="font-semibold text-gray-900 truncate">
-                      {specialist.name}
+                      {specialist?.user?.profile?.firstName +
+                          specialist?.user?.profile?.lastName}
                     </h3>
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {specialist?.expertise?.slice(0, 3)?.map((tag: any, index: number) => (
-                        <Badge
-                          key={index}
-                          style={{ backgroundColor: randomColorPick(index) }}
-                          className={`border-0 text-xs font-medium px-2 py-1 rounded-full`}
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-
-                      {specialist?.expertise?.length > 3 && (
-                        <Badge
-                          className={`bg-[#FF7D00]/70 border-0 text-xs font-medium px-2 py-1 rounded-full`}
-                        >
-                          ...
-                        </Badge>
-                      )}
-                    </div>
                   </div>
+                </div>
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {specialist?.expertise
+                    ?.slice(0, 3)
+                    ?.map((tag: any, index: number) => (
+                      <Badge
+                        key={index}
+                        style={{ backgroundColor: randomColorPick(index) }}
+                        className={`border-0 text-xs font-medium px-2 py-1 rounded-full`}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+
+                  {specialist?.expertise?.length > 3 && (
+                    <Badge
+                      className={`bg-[#FF7D00]/70 border-0 text-xs font-medium px-2 py-1 rounded-full`}
+                    >
+                      ...
+                    </Badge>
+                  )}
                 </div>
 
                 <hr />
@@ -215,23 +90,26 @@ export default function HRServices({ data }: any) {
                 {/* Title */}
                 <div className="flex items-start gap-2 my-3">
                   <Briefcase className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {specialist?.description}
-                  </p>
+                  <p
+                    dangerouslySetInnerHTML={{
+                      __html: specialist?.description?.slice(0, 100) + "...",
+                    }}
+                    className="break-words"
+                  ></p>
                 </div>
 
                 {/* Date */}
                 <div className="flex items-center gap-2 mb-4">
                   <Calendar className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-500">
-                    {specialist.date}
+                    {moment(specialist?.createdAt).format("ll")}
                   </span>
                 </div>
               </div>
 
               {/* Edit Button */}
               <div className="mt-auto">
-                <Link href={"/manage-specialist/add-hr-service"}>
+                <Link href={`/manage-specialist/add-hr-service?id=${specialist?._id}`}>
                   <Button
                     variant="outline"
                     className="w-full justify-center gap-2 hover:bg-gray-50 text-[#4E9DA6] border-t-[#59b0ba] border-l-[#448b93] border-b-[#32656a] border-r-[#2a5256]"

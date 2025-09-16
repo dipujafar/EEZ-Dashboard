@@ -17,8 +17,15 @@ const hrAdminApi = baseApi.injectEndpoints({
         body: data,
       }),
       invalidatesTags: [tagTypes.hrAdmin],
-    })
+    }),
+    getSingleHrAdmin: builder.query({
+      query: (id) => ({
+        url: `/hr-admin/${id}`,
+        method: "GET",
+      }),
+      providesTags: [tagTypes.hrAdmin],
+    }),
   }),
 });
 
-export const { useGetAllHrAdminsQuery, useCrateHrAdminMutation } = hrAdminApi;
+export const { useGetAllHrAdminsQuery, useCrateHrAdminMutation, useGetSingleHrAdminQuery } = hrAdminApi;

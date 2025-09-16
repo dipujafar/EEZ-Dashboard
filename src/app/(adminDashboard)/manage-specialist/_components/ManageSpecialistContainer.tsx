@@ -2,8 +2,6 @@
 import { Tabs } from "antd";
 import HRServiceContainer from "./HRServiceContainer";
 import IssueCategoryContainer from "./IssueCategory/IssueCategoryContainer";
-
-
 const tabData = [
   {
     label: "HR Service",
