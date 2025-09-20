@@ -11,6 +11,8 @@ import {
 } from "@/redux/api/workplaceTagsApi";
 import moment from "moment";
 import TableSkeleton from "../Skeletons/TableSkeleton";
+import { useSearchParams } from "next/navigation";
+import { useDebounce } from "use-debounce";
 
 type TDataType = {
   _id?: string;
@@ -24,8 +26,18 @@ const WorkplaceJournalContainer = () => {
   const [isAddTagSuggestionOpen, setIsOpenSuggestionOpen] = useState(false);
   const [deleteWorkplaceTag] = useDeleteWorkplaceTagsMutation();
 
+  const page = useSearchParams().get("page") || "1";
+  const limit = useSearchParams().get("limit") || "11";
+  const [searchText, setSearchText] = useState("");
+  const [searchValue] = useDebounce(searchText, 500);
+
   // setQueryData
   const queries: Record<string, string | number> = {};
+
+  if (page) queries.page = page;
+  if (limit) queries.limit = limit;
+
+  if (searchValue) queries.searchTerm = searchValue;
 
   const { data: workPlaceData, isLoading } = useGetWorkplaceTagsQuery(queries);
 
@@ -42,7 +54,7 @@ const WorkplaceJournalContainer = () => {
     (data: any, inx: number) => ({
       _id: data?._id,
       key: inx,
-      serial: `# ${inx + 1}`,
+      serial: `# ${Number(page) === 1 ? inx + 1 : (Number(page) - 1) * Number(limit) + inx + 1}`,
       tag: data?.tag,
       date: moment(data?.createdAt).format("ll"),
     })
@@ -95,6 +107,8 @@ const WorkplaceJournalContainer = () => {
             className="mb-3 h-[35px] "
             prefix={<Search size={18} />}
             placeholder="Search here...."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
         </div>
         {/* ---------------- Add Categories & Scenarios ---------------- */}
@@ -119,7 +133,7 @@ const WorkplaceJournalContainer = () => {
         <DataTable
           columns={columns}
           data={data}
-          pageSize={1}
+          pageSize={Number(limit)}
           total={workPlaceData?.data?.meta?.total}
         ></DataTable>
       )}

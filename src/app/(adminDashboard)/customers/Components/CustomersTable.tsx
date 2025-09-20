@@ -147,7 +147,7 @@ const CustomersTable = () => {
       <DataTable
         columns={columns}
         data={data}
-        pageSize={11}
+        pageSize={Number(limit)}
         total={usersData?.data?.meta?.total}
       ></DataTable>
       <UserDetails

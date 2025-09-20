@@ -26,8 +26,8 @@ const DataTable = ({
               pageSize,
               defaultCurrent: Number(page) || 1,
               total: total ?? data?.length,
-              onChange: (page, size) => {
-                updateParams({ page: page.toString(), limit: size.toString()});
+              onChange: (page) => {
+                updateParams({ page: page.toString()});
               },
             }
           : false

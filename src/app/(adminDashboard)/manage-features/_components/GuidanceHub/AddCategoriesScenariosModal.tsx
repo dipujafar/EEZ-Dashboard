@@ -69,9 +69,6 @@ const AddCategoriesScenariosModal = ({
       skip: !selectedId,
     });
 
-
-    
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
