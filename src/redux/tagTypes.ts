@@ -7,6 +7,12 @@ export const tagTypes = {
   earing: "Earning",
   stat: "Stat",
   earningHistory: "EarningHistory",
+  profile: "Profile",
+  guidanceHub: "GuidanceHub",
+  workplaceTags: "WorkplaceTags",
+  communication: "communication",
+  jobSearchHelp: "JobSearchHelp",
+  policyAndRight: "PolicyAndRight",
 };
 
 export const tagTypesList = [
@@ -19,4 +25,10 @@ export const tagTypesList = [
   tagTypes.stat,
   tagTypes.earningHistory,
   tagTypes.hrAdmin,
+  tagTypes.profile,
+  tagTypes.guidanceHub,
+  tagTypes.workplaceTags,
+  tagTypes.communication,
+  tagTypes.jobSearchHelp,
+  tagTypes.policyAndRight,
 ];

@@ -1,7 +1,7 @@
+import { useChangePasswordMutation } from "@/redux/api/authApi";
 import { Button, ConfigProvider, Form, Input, Modal } from "antd";
 import { RiCloseLargeLine } from "react-icons/ri";
-import ForgetPasswordModal from "./ForgetPasswordModal";
-import { useState } from "react";
+import { toast } from "sonner";
 
 type TPropsType = {
   open: boolean;
@@ -10,12 +10,23 @@ type TPropsType = {
 
 const ChangePasswordModal = ({ open, setOpen }: TPropsType) => {
   const [form] = Form.useForm();
-  const [openModal, setOpenModal] = useState(false);
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
+  // const [openModal, setOpenModal] = useState(false);
 
   // @ts-expect-error: Ignoring TypeScript error due to inferred 'any' type for 'values' which is handled in the form submit logic
-  const handleSubmit = (values) => {
-    console.log("Success:", values);
-    setOpen(false);
+  const handleSubmit = async (values) => {
+    if (values.newPassword !== values.confirmPassword) {
+      return toast.error("Password doesn't match with confirm password");
+    }
+    try {
+      await changePassword(values).unwrap();
+      toast.success("Successfully Change password", {
+        duration: 1000,
+      });
+      setOpen(false);
+    } catch (error: any) {
+      toast.error(error?.data?.message);
+    }
   };
   return (
     <>
@@ -58,7 +69,7 @@ const ChangePasswordModal = ({ open, setOpen }: TPropsType) => {
                 Input: {
                   colorBgContainer: "",
                   colorText: "#000",
-                  colorTextPlaceholder: "#000",
+                   colorTextPlaceholder: "#808080",
                 },
                 Form: {
                   labelColor: "var(--color-primary-gray)",
@@ -115,7 +126,7 @@ const ChangePasswordModal = ({ open, setOpen }: TPropsType) => {
                 />
               </Form.Item>
 
-              <p
+              {/* <p
                 onClick={() => {
                   setOpen(false);
                   setOpenModal(true);
@@ -123,13 +134,14 @@ const ChangePasswordModal = ({ open, setOpen }: TPropsType) => {
                 className="mb-5 font-medium cursor-pointer text-gray-600"
               >
                 Forget password?
-              </p>
+              </p> */}
 
               <Button
                 htmlType="submit"
                 size="large"
                 block
                 className="!py-6 border-main-color"
+                loading={isLoading}
               >
                 Update Password
               </Button>
@@ -138,10 +150,10 @@ const ChangePasswordModal = ({ open, setOpen }: TPropsType) => {
         </div>
       </Modal>
       {/* forget password Modal */}
-      <ForgetPasswordModal
+      {/* <ForgetPasswordModal
         open={openModal}
         setOpen={setOpenModal}
-      ></ForgetPasswordModal>
+      ></ForgetPasswordModal> */}
     </>
   );
 };

@@ -43,7 +43,7 @@ export default function SubscriptionContainer() {
   const { data: subscriptionData, isLoading } =
     useGetSubscriptionQuery(undefined);
 
-  console.log(subscriptionData?.data);
+ 
 
   if (isLoading) {
     return <SubscriptionSectionSkeleton />;

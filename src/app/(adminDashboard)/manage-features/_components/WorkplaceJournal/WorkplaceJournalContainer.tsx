@@ -1,52 +1,92 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import DataTable from "@/utils/DataTable";
-import { Input, TableProps } from "antd";
+import { Input, message, Popconfirm, PopconfirmProps, TableProps } from "antd";
 import { CirclePlus, Search, Trash2 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import AddTagSuggestion from "./AddTagSuggestion";
+import {
+  useDeleteWorkplaceTagsMutation,
+  useGetWorkplaceTagsQuery,
+} from "@/redux/api/workplaceTagsApi";
+import moment from "moment";
+import TableSkeleton from "../Skeletons/TableSkeleton";
 
 type TDataType = {
+  _id?: string;
   key?: number;
   serial: string;
   tag: string;
   date: string;
 };
-const data: TDataType[] = Array.from({ length: 6 }).map((data, inx) => ({
-  key: inx,
-  serial: `# ${inx + 1}`,
-  tag: "Harrasment",
-  date: "11 Feb, 2025",
-}));
-
-const columns: TableProps<TDataType>["columns"] = [
-  {
-    title: "Serial",
-    dataIndex: "serial",
-    align: "center",
-  },
-  {
-    title: "Suggested Tag",
-    dataIndex: "tag",
-    align: "center",
-  },
-
-  {
-    title: " Date",
-    dataIndex: "date",
-    align: "center",
-  },
-
-  {
-    title: "Action",
-    dataIndex: "action",
-    render: () => <Trash2 className="text-red-500 cursor-pointer" size={20} />,
-  },
-];
 
 const WorkplaceJournalContainer = () => {
-  const [isAddTagSuggestionOpen, setIsOpenSuggestionOpen] =
-    React.useState(false);
+  const [isAddTagSuggestionOpen, setIsOpenSuggestionOpen] = useState(false);
+  const [deleteWorkplaceTag] = useDeleteWorkplaceTagsMutation();
+
+  // setQueryData
+  const queries: Record<string, string | number> = {};
+
+  const { data: workPlaceData, isLoading } = useGetWorkplaceTagsQuery(queries);
+
+  const confirmBlock = async (id: string) => {
+    try {
+      await deleteWorkplaceTag(id).unwrap();
+      message.success("Successfully deleted.");
+    } catch (error: any) {
+      message.error(error?.data?.message);
+    }
+  };
+
+  const data: TDataType[] = workPlaceData?.data?.data?.map(
+    (data: any, inx: number) => ({
+      _id: data?._id,
+      key: inx,
+      serial: `# ${inx + 1}`,
+      tag: data?.tag,
+      date: moment(data?.createdAt).format("ll"),
+    })
+  );
+
+  const columns: TableProps<TDataType>["columns"] = [
+    {
+      title: "Serial",
+      dataIndex: "serial",
+      align: "center",
+    },
+    {
+      title: "Suggested Tag",
+      dataIndex: "tag",
+      align: "center",
+    },
+
+    {
+      title: " Date",
+      dataIndex: "date",
+      align: "center",
+    },
+
+    {
+      title: "Action",
+      dataIndex: "action",
+      render: (_, rec) => (
+        <Popconfirm
+          title="Are you sure?"
+          description="You want delete this tag?"
+          onConfirm={() => confirmBlock(rec?._id as string)}
+          okText="Yes"
+          cancelText="No"
+        >
+          <div className="ml-auto">
+            <div className="size-7 flex justify-center items-center bg-red-500 rounded-full cursor-pointer">
+              <Trash2 size={18} className="text-white" />
+            </div>
+          </div>
+        </Popconfirm>
+      ),
+    },
+  ];
+
   return (
     <div>
       <div className="flex flex-col lg:flex-row gap-2  justify-between">
@@ -73,7 +113,16 @@ const WorkplaceJournalContainer = () => {
         </div>
       </div>
 
-      <DataTable columns={columns} data={data}></DataTable>
+      {isLoading ? (
+        <TableSkeleton />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={data}
+          pageSize={1}
+          total={workPlaceData?.data?.meta?.total}
+        ></DataTable>
+      )}
       <AddTagSuggestion
         open={isAddTagSuggestionOpen}
         setOpen={setIsOpenSuggestionOpen}

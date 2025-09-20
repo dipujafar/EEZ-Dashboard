@@ -1,17 +1,12 @@
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Calendar, Briefcase, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { message, Pagination, Popconfirm, PopconfirmProps } from "antd";
+import { message, Popconfirm } from "antd";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import moment from "moment";
-
-const confirmBlock: PopconfirmProps["onConfirm"] = (e) => {
-  console.log(e);
-  message.success("Successfully deleted.");
-};
+import { useDeleteHrAdminMutation } from "@/redux/api/hrAdminApi";
 
 const randomColorPick = (index: number) => {
   const color = Math.floor(Math.random() * 3000000 * index + 2).toString(16);
@@ -19,20 +14,32 @@ const randomColorPick = (index: number) => {
 };
 
 export default function HRServices({ data }: any) {
-  console.log(data);
+  const [deleteSpecialist] = useDeleteHrAdminMutation();
+
+  console.log(data)
+
+  const confirmBlock= async (id: string) => {
+    try {
+      await deleteSpecialist(id).unwrap();
+      message.success("Successfully deleted.");
+    } catch (error: any) {
+      message.error(error?.data?.message);
+    }
+  };
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-7xl mx-auto">
         {data?.map((specialist: any) => (
           <Card
-            key={specialist.id}
+            key={specialist?._id}
             className="relative overflow-hidden hover:shadow-lg transition-shadow duration-200"
           >
             <CardContent className="p-4 md:p-6 relative flex flex-col h-full">
               <Popconfirm
                 title="Are you sure?"
                 description="You want delete this service?"
-                onConfirm={confirmBlock}
+                onConfirm={() => confirmBlock(specialist?._id)}
                 okText="Yes"
                 cancelText="No"
               >
@@ -58,7 +65,7 @@ export default function HRServices({ data }: any) {
                   <div className="flex-1 space-y-0.5">
                     <h3 className="font-semibold text-gray-900 truncate">
                       {specialist?.user?.profile?.firstName +
-                          specialist?.user?.profile?.lastName}
+                        specialist?.user?.profile?.lastName}
                     </h3>
                   </div>
                 </div>
@@ -109,7 +116,9 @@ export default function HRServices({ data }: any) {
 
               {/* Edit Button */}
               <div className="mt-auto">
-                <Link href={`/manage-specialist/add-hr-service?id=${specialist?._id}`}>
+                <Link
+                  href={`/manage-specialist/add-hr-service?id=${specialist?._id}`}
+                >
                   <Button
                     variant="outline"
                     className="w-full justify-center gap-2 hover:bg-gray-50 text-[#4E9DA6] border-t-[#59b0ba] border-l-[#448b93] border-b-[#32656a] border-r-[#2a5256]"
@@ -122,10 +131,6 @@ export default function HRServices({ data }: any) {
             </CardContent>
           </Card>
         ))}
-      </div>
-
-      <div className="w-fit ml-auto mt-5">
-        <Pagination defaultCurrent={1} total={50} />
       </div>
     </div>
   );

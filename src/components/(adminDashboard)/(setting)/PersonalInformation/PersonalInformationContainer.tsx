@@ -8,20 +8,53 @@ import profile from "@/assets/image/adminProfile.png";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Camera, Trash2, X } from "lucide-react";
+import {
+  useGetMyProfileQuery,
+  useUpdateProfileMutation,
+} from "@/redux/api/profileApi";
+import ProfileContainerSkeleton from "./ProfileContainerSkeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const PersonalInformationContainer = () => {
+  const { data: profileData, isLoading } = useGetMyProfileQuery(undefined);
+  const [updateProfile, { isLoading: updateProfileLoading }] =
+    useUpdateProfileMutation();
   const route = useRouter();
   const [form] = Form.useForm();
   const [edit, setEdit] = useState(false);
   const [fileName, setFileName] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+
   // @ts-expect-error: Ignoring TypeScript error due to inferred 'any' type for 'values' which is handled in the form submit logic
-  const handleSubmit = (values) => {
-    toast.success("Successfully Change personal information", {
-      duration: 1000,
-    });
-    setEdit(false);
+  const handleSubmit = async (values) => {
+    const formattedData = {
+      profile: {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        phoneNumber: values.phoneNumber,
+      },
+    };
+
+    console.log(fileName);
+
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(formattedData));
+
+    if (fileName) {
+      formData.append("profileImage", fileName);
+    }
+
+    try {
+      await updateProfile(formData).unwrap();
+      toast.success("Successfully Change personal information", {
+        duration: 1000,
+      });
+      setEdit(false);
+    } catch (error: any) {
+      toast.error(error?.data?.message);
+    }
+
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,133 +107,162 @@ const PersonalInformationContainer = () => {
       <hr className="my-4" />
 
       {/* personal information */}
-      <div className="mt-10 flex justify-center flex-col xl:flex-row items-center  gap-10">
-        <div className="bg-primary-light-gray h-[365px] md:w-[350px] rounded-xl border border-main-color flex justify-center items-center  text-text-color">
-          <div className="space-y-1 relative">
-            <div className="relative group">
-              <Image
-                src={imageUrl || profile}
-                alt="adminProfile"
-                width={1200}
-                height={1200}
-                className="size-36 rounded-full flex justify-center items-center"
-              ></Image>
 
-              {/* cancel button */}
-              {fileName && imageUrl && (
-                <div
-                  className="absolute left-4 top-2 cursor-pointer rounded-md bg-primary-pink opacity-0 duration-1000 group-hover:opacity-100"
-                  onClick={() => {
-                    setFileName(null);
-                    setImageUrl(null);
-                  }}
+      {isLoading ? (
+        <ProfileContainerSkeleton />
+      ) : (
+        <div className="mt-10 flex justify-center flex-col xl:flex-row items-center  gap-10">
+          <div className="bg-primary-light-gray h-[365px] md:w-[350px] rounded-xl border border-main-color flex justify-center items-center  text-text-color">
+            <div className="space-y-1 relative">
+              <div className="relative group">
+                {/* <Image
+                  src={imageUrl || profileData?.data?.profile?.profileImage}
+                  alt="adminProfile"
+                  width={1200}
+                  height={1200}
+                  className="size-36 rounded-full flex justify-center items-center"
+                ></Image> */}
+
+                <Avatar className="size-36 rounded-full flex justify-center items-center">
+                  <AvatarImage
+                    src={imageUrl || profileData?.data?.profile?.profileImage}
+                  />
+                  <AvatarFallback className="bg-gray-300 text-3xl">
+                    {profileData?.data?.profile?.firstName?.charAt(0) +
+                      profileData?.data?.profile?.lastName?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* cancel button */}
+                {fileName && imageUrl && (
+                  <div
+                    className="absolute left-4 top-2 cursor-pointer rounded-md bg-primary-pink opacity-0 duration-1000 group-hover:opacity-100"
+                    onClick={() => {
+                      setFileName(null);
+                      setImageUrl(null);
+                    }}
+                  >
+                    <Trash2 size={20} color="red" />
+                  </div>
+                )}
+                {/* upload image */}
+                <input
+                  type="file"
+                  id="fileInput"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                />
+                {/* upload button */}
+                <label
+                  htmlFor="fileInput"
+                  className="flex cursor-pointer flex-col items-center"
                 >
-                  <Trash2 size={20} color="red" />
-                </div>
-              )}
-              {/* upload image */}
-              <input
-                type="file"
-                id="fileInput"
-                className="hidden"
-                onChange={handleFileChange}
-                accept="image/*"
-              />
-              {/* upload button */}
-              <label
-                htmlFor="fileInput"
-                className="flex cursor-pointer flex-col items-center"
-              >
-                <div className="bg-white text-black text-lg p-1 rounded-full  absolute bottom-0 right-3">
-                  <Camera size={20} />
-                </div>
-              </label>
+                 {edit && <div className="bg-white text-black text-lg p-1 rounded-full  absolute bottom-0 right-3">
+                    <Camera size={20} />
+                  </div>}
+                </label>
+              </div>
+              <h3 className="text-2xl text-center">Admin</h3>
             </div>
-            <h3 className="text-2xl text-center">Admin</h3>
           </div>
-        </div>
-        {/* form */}
-        <div className="w-2/4">
-          <ConfigProvider
-            theme={{
-              components: {
-                Input: {
-                  colorBgContainer: "var(--color-primary-light-gray)",
-                  colorText: "#000",
-                  colorTextPlaceholder: "#000",
+          {/* form */}
+          <div className="w-2/4">
+            <ConfigProvider
+              theme={{
+                components: {
+                  Input: {
+                    colorBgContainer: "var(--color-primary-light-gray)",
+                    colorText: "#000",
+                    colorTextPlaceholder: "#808080",
+                  },
+                  Form: {
+                    labelColor: "#000",
+                  },
                 },
-                Form: {
-                  labelColor: "#000",
-                },
-              },
-            }}
-          >
-            <Form
-              form={form}
-              onFinish={handleSubmit}
-              layout="vertical"
-              style={{
-                marginTop: "25px",
-              }}
-              initialValues={{
-                name: "James Tracy",
-                email: "enrique@gmail.com",
-                phone: "3000597212",
               }}
             >
-              {/*  input  name */}
-              <Form.Item label="Name" name="name">
-                {edit ? (
-                  <Input size="large" placeholder="Enter full name "></Input>
-                ) : (
-                  <Input
-                    size="large"
-                    placeholder="Enter full name "
-                    readOnly
-                  ></Input>
-                )}
-              </Form.Item>
+              <Form
+                form={form}
+                onFinish={handleSubmit}
+                layout="vertical"
+                style={{
+                  marginTop: "25px",
+                }}
+                initialValues={{
+                  firstName: profileData?.data?.profile?.firstName,
+                  lastName: profileData?.data?.profile?.lastName,
+                  email: profileData?.data?.email,
+                  phone: profileData?.data?.profile?.phoneNumber,
+                }}
+              >
+                {/*  input  first Name */}
+                <Form.Item label="First Name" name="firstName">
+                  {edit ? (
+                    <Input size="large" placeholder="Enter first name "></Input>
+                  ) : (
+                    <Input
+                      size="large"
+                      placeholder="Enter first name "
+                      readOnly
+                    ></Input>
+                  )}
+                </Form.Item>
 
-              {/*  input  email */}
-              <Form.Item label="Email" name="email">
-                {edit ? (
-                  <Input size="large" placeholder="Enter email "></Input>
-                ) : (
+                {/*  input  last Name */}
+                <Form.Item label="Last Name" name="lastName">
+                  {edit ? (
+                    <Input size="large" placeholder="Enter last name "></Input>
+                  ) : (
+                    <Input
+                      size="large"
+                      placeholder="Enter last name "
+                      readOnly
+                    ></Input>
+                  )}
+                </Form.Item>
+
+                {/*  input  email */}
+                <Form.Item label="Email" name="email">
                   <Input
                     size="large"
                     placeholder="Enter email"
                     readOnly
                   ></Input>
-                )}
-              </Form.Item>
+                </Form.Item>
 
-              {/* input  phone number  */}
-              <Form.Item label="Phone Number" name="phone">
-                {edit ? (
-                  <Input size="large" placeholder="Enter Phone number"></Input>
-                ) : (
-                  <Input
+                {/* input  phone number  */}
+                <Form.Item label="Phone Number" name="phone">
+                  {edit ? (
+                    <Input
+                      size="large"
+                      placeholder="Enter Phone number"
+                    ></Input>
+                  ) : (
+                    <Input
+                      size="large"
+                      placeholder="Enter Phone number"
+                      readOnly
+                    ></Input>
+                  )}
+                </Form.Item>
+
+                <div className={edit ? "" : "hidden"}>
+                  <Button
+                    htmlType="submit"
                     size="large"
-                    placeholder="Enter Phone number"
-                    readOnly
-                  ></Input>
-                )}
-              </Form.Item>
-
-              <div className={edit ? "" : "hidden"}>
-                <Button
-                  htmlType="submit"
-                  size="large"
-                  block
-                  style={{ border: "none" }}
-                >
-                  Save Change
-                </Button>
-              </div>
-            </Form>
-          </ConfigProvider>
+                    block
+                    style={{ border: "none" }}
+                    disabled={updateProfileLoading}
+                  >
+                    Save Change
+                  </Button>
+                </div>
+              </Form>
+            </ConfigProvider>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

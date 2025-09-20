@@ -37,7 +37,7 @@ const EarningsChart = ({ className }: EarningsChartProps) => {
   const [selectedYear, setSetSelectedYear] = useState(currentYear);
   const { data, isLoading } = useGetEarningsChartQuery({ year: selectedYear });
 
-  console.log(data?.data?.monthlyData);
+  
 
   if (isLoading) return <EarningsOverviewSkeleton />;
 

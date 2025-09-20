@@ -5,6 +5,7 @@ import { Input, TableProps } from "antd";
 import { CirclePlus, Eye, Search, Trash2 } from "lucide-react";
 import React from "react";
 import AddPolicyRightsLibraryModal from "./AddPolicyRightsLibraryModal";
+import { useDeletePolicyAndRightMutation, useGetPolicyAndRightQuery } from "@/redux/api/policyAndRightApi";
 
 type TDataType = {
   key?: number;
@@ -16,6 +17,11 @@ type TDataType = {
 const PolicyRightLibraryContainer = () => {
   const [isAddTemplateOpen, setIsOpenAddTemplateModal] = React.useState(false);
   const [isDetails, setIsDetails] = React.useState(false);
+
+  const {data: policyAndRightData} = useGetPolicyAndRightQuery({})
+  const [deletePolicyAndRight] = useDeletePolicyAndRightMutation();
+
+  console.log(policyAndRightData);
 
   const data: TDataType[] = Array.from({ length: 6 }).map((data, inx) => ({
     key: inx,

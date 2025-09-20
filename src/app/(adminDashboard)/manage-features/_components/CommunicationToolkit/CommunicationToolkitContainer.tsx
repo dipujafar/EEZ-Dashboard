@@ -1,12 +1,19 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import DataTable from "@/utils/DataTable";
-import { Input, TableProps } from "antd";
+import { Input, message, Popconfirm, TableProps } from "antd";
 import { CirclePlus, Eye, Search, Trash2 } from "lucide-react";
 import React from "react";
 import AddTemplatesModal from "./AddTemplatesModal";
+import {
+  useDeleteCommunicationMutation,
+  useGetCommunicationQuery,
+} from "@/redux/api/communicationApi";
+import TableSkeleton from "../Skeletons/TableSkeleton";
+import moment from "moment";
 
 type TDataType = {
+  _id?: string;
   key?: number;
   serial: string;
   template_name: string;
@@ -15,13 +22,29 @@ type TDataType = {
 
 const CommunicationToolkitContainer = () => {
   const [isAddTemplateOpen, setIsOpenAddTemplateModal] = React.useState(false);
+  const { data: communicationData, isLoading } = useGetCommunicationQuery({});
+  const [deleteCommunication] = useDeleteCommunicationMutation();
 
-  const data: TDataType[] = Array.from({ length: 6 }).map((data, inx) => ({
-    key: inx,
-    serial: `# ${inx + 1}`,
-    template_name: "Requesting a meeting",
-    date: "11 Feb, 2025",
-  }));
+  console.log(communicationData);
+
+  const confirmBlock = async (id: string) => {
+    try {
+      await deleteCommunication(id).unwrap();
+      message.success("Successfully deleted.");
+    } catch (error: any) {
+      message.error(error?.data?.message);
+    }
+  };
+
+  const data: TDataType[] = communicationData?.data?.map(
+    (data: any, inx: number) => ({
+      _id: data._id,
+      key: inx,
+      serial: `# ${inx + 1}`,
+      template_name: data?.title,
+      date: moment(data?.createdAt).format("ll"),
+    })
+  );
 
   const columns: TableProps<TDataType>["columns"] = [
     {
@@ -44,7 +67,7 @@ const CommunicationToolkitContainer = () => {
     {
       title: "Action",
       dataIndex: "action",
-      render: () => (
+      render: (_, rec) => (
         <div className="flex gap-x-2">
           {" "}
           <Eye
@@ -52,7 +75,19 @@ const CommunicationToolkitContainer = () => {
             size={20}
             color="#78C0A8"
           />{" "}
-          <Trash2 className="text-red-500 cursor-pointer" size={20} />
+          <Popconfirm
+            title="Are you sure?"
+            description="You want delete this?"
+            onConfirm={() => confirmBlock(rec?._id as string)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <div className="">
+              <div className="size-6 flex justify-center items-center bg-red-500 rounded-full cursor-pointer">
+                <Trash2 size={16} className="text-white" />
+              </div>
+            </div>
+          </Popconfirm>
         </div>
       ),
     },
@@ -83,7 +118,11 @@ const CommunicationToolkitContainer = () => {
         </div>
       </div>
 
-      <DataTable columns={columns} data={data}></DataTable>
+      {isLoading ? (
+        <TableSkeleton />
+      ) : (
+        <DataTable columns={columns} data={data}></DataTable>
+      )}
       <AddTemplatesModal
         open={isAddTemplateOpen}
         setOpen={setIsOpenAddTemplateModal}

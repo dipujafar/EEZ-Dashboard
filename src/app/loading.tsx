@@ -1,9 +1,10 @@
+"use client";
 import { ConfigProvider, Spin } from "antd";
 
 const loading = () => {
   return (
     <div className=" h-screen w-full flex justify-center items-center">
-      <ConfigProvider
+      {/* <ConfigProvider
         theme={{
           components: {
             Spin: {
@@ -13,7 +14,7 @@ const loading = () => {
         }}
       >
         <Spin size="large" />
-      </ConfigProvider>
+      </ConfigProvider> */}
     </div>
   );
 };

@@ -1,13 +1,33 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { CirclePlus, Search } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import GuidanceHubFeatures from "./GuidanceHubFeatures";
 import AddCategoriesScenariosModal from "./AddCategoriesScenariosModal";
-import { Input, Pagination } from "antd";
+import { Input } from "antd";
+import { useGetGuidanceHubQuery } from "@/redux/api/guidanceHubApi";
+import PaginationSection from "@/components/shared/pagination/PaginationSection";
+import { useSearchParams } from "next/navigation";
+import { useDebounce } from "use-debounce";
+import GuidanceSkeleton from "./Skeletons/Skeleton";
+import Empty from "@/components/ui/Empty";
 
 const GuidanceHub = () => {
-  const [isOpenAddCategories, setIsOpenAddCategories] = React.useState(false);
+  const [isOpenAddCategories, setIsOpenAddCategories] = useState(false);
+  const page = useSearchParams()?.get("page") || "1";
+  const limit = 9;
+  const [searchText, setSearchText] = useState("");
+  const [searchValue] = useDebounce(searchText, 500);
+  const queries: Record<string, string | number> = {};
+
+
+  if (page) queries["page"] = page;
+  if (limit) queries["limit"] = limit;
+  if (searchValue) queries["searchTerm"] = searchValue;
+  const { data: guidanceHubData, isLoading } = useGetGuidanceHubQuery(queries);
+
+  if (isLoading) return <GuidanceSkeleton />;
+
   return (
     <div className="space-y-5">
       <div className="flex flex-col lg:flex-row gap-2  justify-between">
@@ -16,6 +36,8 @@ const GuidanceHub = () => {
             className="mb-3 h-[35px] "
             prefix={<Search size={18} />}
             placeholder="Search here...."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
         </div>
         {/* ---------------- Add Categories & Scenarios ---------------- */}
@@ -33,14 +55,23 @@ const GuidanceHub = () => {
           </Button>
         </div>
       </div>
-      <GuidanceHubFeatures />
+      {guidanceHubData?.data?.result?.length > 0 ? (
+        <GuidanceHubFeatures data={guidanceHubData?.data?.result} />
+      ) : (
+        <Empty message="No data found" />
+      )}
 
       <div className="w-fit ml-auto">
-        <Pagination defaultCurrent={1} total={50} />
+        <PaginationSection
+          total={guidanceHubData?.data?.meta?.total}
+          current={Number(page)}
+          pageSize={limit}
+        />
       </div>
       <AddCategoriesScenariosModal
         open={isOpenAddCategories}
         setOpen={setIsOpenAddCategories}
+      
       />
     </div>
   );

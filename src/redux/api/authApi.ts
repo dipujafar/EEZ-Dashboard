@@ -22,8 +22,8 @@ const authApi = baseApi.injectEndpoints({
     }),
     verifyOtp: build.mutation({
       query: (data) => ({
-        url: "/otp/verify-otp",
-        method: "POST",
+        url: "/auth/verify-otp",
+        method: "PATCH",
         body: data,
       }),
       invalidatesTags: [tagTypes.auth],
@@ -31,15 +31,15 @@ const authApi = baseApi.injectEndpoints({
     resetPassword: build.mutation({
       query: (data) => ({
         url: "/auth/reset-password",
-        method: "POST",
+        method: "PATCH",
         body: data,
       }),
       invalidatesTags: [tagTypes.auth],
     }),
     changePassword: build.mutation({
       query: (data) => ({
-        url: "/user/change_password",
-        method: "PATCH",
+        url: "/auth/change-password",
+        method: "POST",
         body: data,
       }),
       invalidatesTags: [tagTypes.auth],

@@ -1,15 +1,39 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Input } from "antd";
+import { Input, Pagination } from "antd";
 import { CirclePlus, Search } from "lucide-react";
-import React from "react";
+import React, {  useEffect, useState } from "react";
 import HRServices from "./HRServices";
 import Link from "next/link";
 import { useGetAllHrAdminsQuery } from "@/redux/api/hrAdminApi";
 import { HRServicesPageSkeleton } from "./skeleton/HRServiceSkeleton";
+import { useSearchParams } from "next/navigation";
+import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams";
+import { useDebounce } from "use-debounce";
+import PaginationSection from "@/components/shared/pagination/PaginationSection";
 
 const HRServiceContainer = () => {
-  const { data: hrAdminData, isLoading } = useGetAllHrAdminsQuery(undefined);
+  const updateParams = useUpdateSearchParams();
+  const page = useSearchParams()?.get("page") || "1";
+  const limit = 9;
+  const [searchText, setSearchText] = useState("");
+  const [searchValue] = useDebounce(searchText, 500);
+  const queries: Record<string, string | number> = {};
+  if (page) queries["page"] = page;
+  if (limit) queries["limit"] = limit;
+  if (searchValue) queries["searchTerm"] = searchValue;
+
+  const { data: hrAdminData, isLoading } = useGetAllHrAdminsQuery(queries);
+
+  console.log(hrAdminData?.data?.data);
+// ------------------- once any one want to search then set page to 1 ------------------------
+  useEffect(() => {
+    if (searchValue && searchText) {
+      updateParams({ page: "1" });
+    }
+  }, [searchValue, searchText]);
+
+
 
   if (isLoading) {
     return <HRServicesPageSkeleton />;
@@ -22,7 +46,7 @@ const HRServiceContainer = () => {
         className="p-6 bg-white rounded-lg"
       >
         <h6>Total Specialist</h6>
-        <h4 className="text-3xl font-bold">20</h4>
+        <h4 className="text-3xl font-bold">{hrAdminData?.data?.meta?.total}</h4>
       </div>
 
       {/*  ++++++++++++++++++++++ search option and add new hr service +++++++++++++++++++++     */}
@@ -32,6 +56,8 @@ const HRServiceContainer = () => {
             className="mb-3 h-[35px] "
             prefix={<Search size={18} />}
             placeholder="Search here...."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
         </div>
         {/* ---------------- Add Categories & Scenarios ---------------- */}
@@ -53,6 +79,8 @@ const HRServiceContainer = () => {
 
       {/* ++++++++++++++++++++++ hr service data +++++++++++++++++++++ */}
       <HRServices data={hrAdminData?.data?.data} />
+      <PaginationSection total={hrAdminData?.data?.meta?.total} current={Number(page) || 1} pageSize={limit} />
+    
     </div>
   );
 };

@@ -1,17 +1,10 @@
 "use client";
-
-import type React from "react";
-
-import { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, HelpCircle, Upload, Trash2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -23,29 +16,15 @@ import {
 import { Modal } from "antd";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
 import { RiCloseLargeLine } from "react-icons/ri";
+import { useCreateWorkplaceTagsMutation } from "@/redux/api/workplaceTagsApi";
 
 // Validation schema
 const formSchema = z.object({
   suggestedTag: z.string().min(1, "Suggested tag name is required"),
-
-  scenarios: z
-    .array(
-      z.object({
-        id: z.string(),
-        text: z.string().min(1, "Scenario text is required"),
-        checked: z.boolean(),
-      })
-    )
-    .min(1, "At least one scenario is required"),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-interface Scenario {
-  id: string;
-  text: string;
-  checked: boolean;
-}
 const AddTagSuggestion = ({
   open,
   setOpen,
@@ -57,37 +36,21 @@ const AddTagSuggestion = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       suggestedTag: "",
-      scenarios: [
-        { id: "1", text: "Harassment", checked: true },
-        {
-          id: "2",
-          text: "Burnout",
-          checked: true,
-        },
-        { id: "3", text: "Promotion", checked: true },
-      ],
     },
   });
 
-  const { fields, remove, update } = useFieldArray({
-    control: form.control,
-    name: "scenarios",
-  });
+  const [createWorkSpace] = useCreateWorkplaceTagsMutation();
 
-  const toggleScenario = (index: number) => {
-    const currentScenario = fields[index];
-    update(index, {
-      ...currentScenario,
-      checked: !currentScenario.checked,
-    });
-  };
+  const onSubmit = async (data: FormData) => {
+    const formattedData = { tag: data?.suggestedTag };
+    try {
+      await createWorkSpace(formattedData).unwrap();
+      form.reset();
+      setOpen(false);
+    } catch (error: any) {
+      console.log(error);
+    }
 
-  const deleteScenario = (index: number) => {
-    remove(index);
-  };
-
-  const onSubmit = (data: FormData) => {
-    // call api for submitting the form
   };
 
   const onError = (errors: any) => {
@@ -146,57 +109,6 @@ const AddTagSuggestion = ({
                       </FormItem>
                     )}
                   />
-
-                  {/* Add Scenario Section */}
-                  <div className="space-y-4">
-                    {/* Scenarios List */}
-                    <div className="space-y-3">
-                      {fields.map((scenario, index) => (
-                        <div
-                          key={scenario.id}
-                          className="flex items-center gap-3 group bg-[#EDF5F6] text-[#204C48] px-2"
-                        >
-                          <FormField
-                            control={form.control}
-                            name={`scenarios.${index}.checked`}
-                            render={({ field }) => (
-                              <FormItem className="flex items-center space-x-0">
-                                <FormControl>
-                                  <Checkbox
-                                    className="border-[#204C48] fill-[#204C48]"
-                                    checked={field.value}
-                                    onCheckedChange={(checked) => {
-                                      field.onChange(checked);
-                                      toggleScenario(index);
-                                    }}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <Label className="flex-1 text-sm text-[#204C48] cursor-pointer">
-                            {scenario.text}
-                          </Label>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteScenario(index)}
-                            className="transition-opacity h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Scenarios validation error */}
-                    {form.formState.errors.scenarios && (
-                      <p className="text-sm text-red-600">
-                        {form.formState.errors.scenarios.message}
-                      </p>
-                    )}
-                  </div>
 
                   {/* Save Button */}
                   <div className="pt-4">

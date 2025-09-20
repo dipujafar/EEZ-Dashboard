@@ -4,9 +4,10 @@ import { baseApi } from "./baseApi";
 const hrAdminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllHrAdmins: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "/hr-admin",
         method: "GET",
+        params,
       }),
       providesTags: [tagTypes.hrAdmin],
     }),
@@ -25,7 +26,14 @@ const hrAdminApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.hrAdmin],
     }),
+    deleteHrAdmin: builder.mutation({
+      query: (id) => ({
+        url: `/hr-admin/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [tagTypes.hrAdmin],
+    })
   }),
 });
 
-export const { useGetAllHrAdminsQuery, useCrateHrAdminMutation, useGetSingleHrAdminQuery } = hrAdminApi;
+export const { useGetAllHrAdminsQuery, useCrateHrAdminMutation, useGetSingleHrAdminQuery, useDeleteHrAdminMutation } = hrAdminApi;

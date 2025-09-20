@@ -1,5 +1,7 @@
 "use client";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
+import { Error_Modal } from "@/modals";
+import { useForgetPasswordMutation } from "@/redux/api/authApi";
 import type { FormProps } from "antd";
 import { Button, Form, Input } from "antd";
 import { useRouter } from "next/navigation";
@@ -8,19 +10,20 @@ type FieldType = {
   email?: string;
 };
 
-const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
-  console.log("Failed:", errorInfo);
-};
-
 const ForgetPassForm = () => {
   const route = useRouter();
+  const [forgetPass, { isLoading }] = useForgetPasswordMutation();
 
   //handle password change
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     console.log("Success:", values);
 
-    if (values.email) {
+    try {
+      const res = await forgetPass(values).unwrap();
+      sessionStorage?.setItem("forgotPasswordToken", res?.data?.forgetToken);
       route.push("/verify-email");
+    } catch (error: any) {
+      Error_Modal({ title: error?.data?.message });
     }
   };
 
@@ -29,7 +32,6 @@ const ForgetPassForm = () => {
       name="basic"
       initialValues={{ remember: true }}
       onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
       autoComplete="off"
       layout="vertical"
     >
@@ -47,7 +49,18 @@ const ForgetPassForm = () => {
         <Input size="large" placeholder="Email" />
       </Form.Item>
 
-      <Button style={{background: "linear-gradient(180deg, #4DB6AC 0.89%, #1A2935 100.89%)", boxShadow: "7px 8px 4.7px 0px rgba(0, 0, 0, 0.08) inset"}} className="group" htmlType="submit" size="large" block >
+      <Button
+        loading={isLoading}
+        disabled={isLoading}
+        style={{
+          background: "linear-gradient(180deg, #4DB6AC 0.89%, #1A2935 100.89%)",
+          boxShadow: "7px 8px 4.7px 0px rgba(0, 0, 0, 0.08) inset",
+        }}
+        className="group"
+        htmlType="submit"
+        size="large"
+        block
+      >
         Send OTP
         <AnimatedArrow size={20} />
       </Button>

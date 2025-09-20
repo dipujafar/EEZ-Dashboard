@@ -55,7 +55,7 @@ export const navLinks = [
   {
     key: "logout",
     icon: <LogOut size={18} />,
-    label: <Link href={"/login"} className="!text-[#5F1011]">Logout</Link>,
+    label: <span className="!text-[#5F1011]">Logout</span>,
   }
   //   {
   //     key: "user-request",

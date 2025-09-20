@@ -33,7 +33,7 @@ const EarningTable = () => {
 
   const { data: earningData, isLoading } = useGetEarningHistoryQuery(queries);
 
-  console.log(earningData?.data?.result);
+ 
 
   if (isLoading) return <SubscriptionTableSkeleton />;
 

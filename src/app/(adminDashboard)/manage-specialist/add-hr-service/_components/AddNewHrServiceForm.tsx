@@ -46,11 +46,13 @@ export default function AddNewHrServiceForm() {
   const [confirmPassword, setConfirmPassword] = useState(false);
   const [createHr, { isLoading }] = useCrateHrAdminMutation();
   const id = useSearchParams().get("id");
-  const { data } = useGetSingleHrAdminQuery(id, {
+  const { data: singleHrAdminData } = useGetSingleHrAdminQuery(id, {
     skip: !id,
   });
 
-  console.log(data)
+  console.log(singleHrAdminData?.data);
+
+ 
 
   const form = useForm<TFormData>({
     resolver: zodResolver(formSchema),
@@ -58,7 +60,7 @@ export default function AddNewHrServiceForm() {
       email: "",
       password: "",
       expertiseAreas: [],
-      howHelp: [],
+      howHelp: singleHrAdminData?.data?.howHelp || [],
       startDay: "",
       endDay: "",
       startTime: "",
