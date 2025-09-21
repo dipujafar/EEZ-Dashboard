@@ -1,5 +1,5 @@
 "use client";
-import {  Avatar, Badge, Flex } from "antd";
+import { Avatar, Badge, Flex } from "antd";
 import { FaBars } from "react-icons/fa6";
 import { IoNotificationsOutline } from "react-icons/io5";
 import Link from "next/link";
@@ -17,6 +17,9 @@ import {
 import { ChevronRight } from "lucide-react";
 import avatarImg from "@/assets/image/profile.png";
 import { cn } from "@/lib/utils";
+import { useAppDispatch } from "@/redux/hooks";
+import { logout } from "@/redux/features/authSlice";
+import { useRouter } from "next/navigation";
 
 type TNavbarProps = {
   collapsed: boolean;
@@ -25,6 +28,8 @@ type TNavbarProps = {
 
 const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
   const greeting = useGreeting();
+  const dispatch = useAppDispatch();
+  const router = useRouter();
   return (
     <div className="flex items-center justify-between w-[97%] font-poppins text-text-color xl:px-8 px-4">
       {/* Header left side */}
@@ -67,53 +72,58 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
                 top: "-24px",
                 right: "-8px",
                 fontSize: "10px",
-             
               }}
             ></Badge>
           </div>
         </Link>
 
-       
-       {/* user profile */}
-         <Menubar className="py-8 border-none shadow-none px-0 border ">
-        <MenubarMenu>
-          <MenubarTrigger className="shadow-none px-0">
-            <div
-              className={cn(
-                " text-black flex items-center gap-x-1 cursor-pointer",
-              )}
-            >
-              <Avatar
-                src={avatarImg.src}
-                size={40}
-                className="border border-main-color size-16"
-              ></Avatar>
-              <h4
+        {/* user profile */}
+        <Menubar className="py-8 border-none shadow-none px-0 border ">
+          <MenubarMenu>
+            <MenubarTrigger className="shadow-none px-0">
+              <div
                 className={cn(
-                  "text-base font-medium truncate flex-1",
-                  collapsed && "hidden"
+                  " text-black flex items-center gap-x-1 cursor-pointer"
                 )}
               >
-                Istiak
-              </h4>
-            </div>
-          </MenubarTrigger>
-          <MenubarContent className="text-primary-gray">
-            <Link href={"/personal-information"}>
-            <MenubarItem className="hover:bg-gray-100 cursor-pointer">
-              Profile{" "}
-              <MenubarShortcut>
-                <ChevronRight size={16} />
-              </MenubarShortcut>
-            </MenubarItem>
-            </Link>
-            <MenubarSeparator />
-            <Link href={"/login"}>
-              <MenubarItem className="hover:bg-gray-100 cursor-pointer">Logout</MenubarItem>
-            </Link>
-          </MenubarContent>
-        </MenubarMenu>
-      </Menubar>
+                <Avatar
+                  src={avatarImg.src}
+                  size={40}
+                  className="border border-main-color size-16"
+                ></Avatar>
+                <h4
+                  className={cn(
+                    "text-base font-medium truncate flex-1",
+                    collapsed && "hidden"
+                  )}
+                >
+                  Istiak
+                </h4>
+              </div>
+            </MenubarTrigger>
+            <MenubarContent className="text-primary-gray">
+              <Link href={"/personal-information"}>
+                <MenubarItem className="hover:bg-gray-100 cursor-pointer">
+                  Profile{" "}
+                  <MenubarShortcut>
+                    <ChevronRight size={16} />
+                  </MenubarShortcut>
+                </MenubarItem>
+              </Link>
+              <MenubarSeparator />
+
+              <MenubarItem
+                onClick={() => {
+                  dispatch(logout());
+                  router.refresh();
+                }}
+                className="hover:bg-gray-100 cursor-pointer"
+              >
+                Logout
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+        </Menubar>
       </Flex>
     </div>
   );

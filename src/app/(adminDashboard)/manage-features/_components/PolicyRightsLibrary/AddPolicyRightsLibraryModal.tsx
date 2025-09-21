@@ -1,6 +1,6 @@
 "use client";
 import type React from "react";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,14 +20,18 @@ import { Modal } from "antd";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
 import { RiCloseLargeLine } from "react-icons/ri";
 import RichTextEditor from "@/app/(adminDashboard)/manage-content-type/_components/RichTextEditor";
-import { useCreatePolicyAndRightMutation } from "@/redux/api/policyAndRightApi";
+import {
+  useCreatePolicyAndRightMutation,
+  useGetSinglePolicyAndRightQuery,
+  useUpdatePolicyAndRightMutation,
+} from "@/redux/api/policyAndRightApi";
 import { Error_Modal } from "@/modals";
 import { toast } from "sonner";
 
 // Validation schema
 const formSchema = z.object({
   policyTitle: z.string().min(1, "Category name is required"),
-  file: z.instanceof(File),
+  file: z.instanceof(File).optional(),
   policyContent: z.string().min(1, "Policy content is required"),
 });
 
@@ -36,12 +40,19 @@ type FormData = z.infer<typeof formSchema>;
 const AddPolicyRightsLibraryModal = ({
   open,
   setOpen,
+  selectedId,
 }: {
   open: boolean;
   setOpen: (collapsed: boolean) => void;
+  selectedId?: string;
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [createPolicyRightsLibrary] = useCreatePolicyAndRightMutation();
+  const { data: singlePolicyRightsLibraryData } =
+    useGetSinglePolicyAndRightQuery(selectedId, { skip: !selectedId });
+  const [updatePolicyRightsLibrary] = useUpdatePolicyAndRightMutation();
+
+  console.log(singlePolicyRightsLibraryData?.data);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -51,6 +62,17 @@ const AddPolicyRightsLibraryModal = ({
       policyContent: "",
     },
   });
+
+  const { setValue } = form;
+
+  useEffect(() => {
+    if (singlePolicyRightsLibraryData?.data && selectedId) {
+      setValue("policyTitle", singlePolicyRightsLibraryData?.data?.title);
+      setValue("policyContent", singlePolicyRightsLibraryData?.data?.content);
+    } else {
+      form.reset();
+    }
+  }, [singlePolicyRightsLibraryData?.data, selectedId]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -84,6 +106,26 @@ const AddPolicyRightsLibraryModal = ({
       formData.append("image", data?.file);
     }
 
+    if (selectedId && singlePolicyRightsLibraryData?.data) {
+      try {
+        await updatePolicyRightsLibrary({
+          id: selectedId,
+          data: formData,
+        }).unwrap();
+        toast.success("Policy updated successfully");
+        setOpen(false);
+        return;
+      } catch (error: any) {
+        Error_Modal({ title: error?.data?.message });
+        return;
+      }
+    }
+
+    if (!data?.file) {
+      toast.error("Please upload an image or icon");
+      return;
+    }
+
     // call api for submitting the form
     try {
       await createPolicyRightsLibrary(formData).unwrap();
@@ -95,9 +137,6 @@ const AddPolicyRightsLibraryModal = ({
     }
   };
 
-  const onError = (errors: any) => {
-    console.log("Form validation errors:", errors);
-  };
   return (
     <Modal
       open={open}
@@ -128,7 +167,7 @@ const AddPolicyRightsLibraryModal = ({
             <CardContent className="px-0">
               <Form {...form}>
                 <form
-                  onSubmit={form.handleSubmit(onSubmit, onError)}
+                  onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
                   {/* Upload Image/Icon Section */}

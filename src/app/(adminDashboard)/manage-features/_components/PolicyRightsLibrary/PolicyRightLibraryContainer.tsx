@@ -12,7 +12,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { useDebounce } from "use-debounce";
 import moment from "moment";
-
+import TableSkeleton from "../Skeletons/TableSkeleton";
 
 type TDataType = {
   id: string;
@@ -23,7 +23,7 @@ type TDataType = {
 };
 
 const PolicyRightLibraryContainer = () => {
-  const [isAddTemplateOpen, setIsOpenAddTemplateModal] = React.useState(false);  
+  const [isAddTemplateOpen, setIsOpenAddTemplateModal] = React.useState(false);
   const [deletePolicyAndRight] = useDeletePolicyAndRightMutation();
   const [selectedId, setSelectedId] = useState("");
   const page = useSearchParams().get("page") || "1";
@@ -39,8 +39,7 @@ const PolicyRightLibraryContainer = () => {
 
   if (searchValue) queries.searchTerm = searchValue;
 
-
-  const { data: policyAndRightData } = useGetPolicyAndRightQuery(queries);
+  const { data: policyAndRightData, isLoading } = useGetPolicyAndRightQuery(queries);
 
   const data: TDataType[] = policyAndRightData?.data?.data?.map(
     (data: any, inx: number) => ({
@@ -56,9 +55,7 @@ const PolicyRightLibraryContainer = () => {
     })
   );
 
-
-
-   const confirmBlock = async (id: string) => {
+  const confirmBlock = async (id: string) => {
     try {
       await deletePolicyAndRight(id).unwrap();
       message.success("Successfully deleted.");
@@ -95,7 +92,6 @@ const PolicyRightLibraryContainer = () => {
             onClick={() => {
               setSelectedId(rec?.id as string);
               setIsOpenAddTemplateModal(true);
-
             }}
             size={20}
             color="#78C0A8"
@@ -145,10 +141,20 @@ const PolicyRightLibraryContainer = () => {
         </div>
       </div>
 
-      <DataTable columns={columns} data={data}></DataTable>
+      {isLoading ? (
+        <TableSkeleton />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={data}
+          pageSize={Number(limit)}
+          total={policyAndRightData?.data?.meta?.total}
+        ></DataTable>
+      )}
       <AddPolicyRightsLibraryModal
         open={isAddTemplateOpen}
         setOpen={setIsOpenAddTemplateModal}
+        selectedId={selectedId}
       />
     </div>
   );

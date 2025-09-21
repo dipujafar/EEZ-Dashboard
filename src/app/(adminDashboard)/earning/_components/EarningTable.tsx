@@ -7,7 +7,8 @@ import { useSearchParams } from "next/navigation";
 import { useDebounce } from "use-debounce";
 import { useState } from "react";
 import SubscriptionTableSkeleton from "./skeleton/SubscriptionSkeletonTable";
-import moment  from "moment";
+import moment from "moment";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type TDataType = {
   key?: number;
@@ -16,6 +17,7 @@ type TDataType = {
   email: string;
   amount: number;
   date: string;
+  profilePic: string;
   subscription_type: "basic" | "premium" | "advanced";
 };
 
@@ -33,8 +35,6 @@ const EarningTable = () => {
 
   const { data: earningData, isLoading } = useGetEarningHistoryQuery(queries);
 
- 
-
   if (isLoading) return <SubscriptionTableSkeleton />;
 
   const data: TDataType[] = earningData?.data?.result?.map(
@@ -45,6 +45,7 @@ const EarningTable = () => {
         data?.userId?.profile?.firstName +
         " " +
         data?.userId?.profile?.lastName,
+      profilePic: data?.userId?.profile?.profileImage,
       email: data?.userId?.email,
       amount: data?.amount,
       date: moment(data?.createdAt).format("ll"),
@@ -65,13 +66,18 @@ const EarningTable = () => {
 
       render: (text, record) => (
         <div className="flex  items-center gap-x-1">
-          <Image
-            src={"/hr-image.png"}
-            alt="profile-picture"
-            width={40}
-            height={40}
-            className="size-10"
-          ></Image>
+          <Avatar>
+            <AvatarImage
+              src={record?.profilePic}
+              alt="profile-picture"
+              width={40}
+              height={40}
+              className="size-10"
+            ></AvatarImage>
+            <AvatarFallback className="bg-gray-300">
+              {record?.providerName?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
           <p>{text}</p>
         </div>
       ),
