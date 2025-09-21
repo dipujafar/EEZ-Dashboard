@@ -13,6 +13,7 @@ export const tagTypes = {
   communication: "communication",
   jobSearchHelp: "JobSearchHelp",
   policyAndRight: "PolicyAndRight",
+  manageContent: "ManageContent",
 };
 
 export const tagTypesList = [
@@ -31,4 +32,5 @@ export const tagTypesList = [
   tagTypes.communication,
   tagTypes.jobSearchHelp,
   tagTypes.policyAndRight,
+  tagTypes.manageContent,
 ];

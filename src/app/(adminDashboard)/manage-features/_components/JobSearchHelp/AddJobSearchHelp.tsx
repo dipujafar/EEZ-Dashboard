@@ -1,15 +1,13 @@
 "use client";
-
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, HelpCircle, Upload } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -21,17 +19,16 @@ import {
 import { Modal } from "antd";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
 import { RiCloseLargeLine } from "react-icons/ri";
-import dynamic from "next/dynamic";
-
-// Dynamically import ReactQuill with SSR disabled
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import { useCreateJobSearchHelpMutation, useGetSingleJobSearchHelpQuery, useUpdateJobSearchHelpMutation } from "@/redux/api/jobSearchHelpApi";
+import RichTextEditor from "@/app/(adminDashboard)/manage-content-type/_components/RichTextEditor";
+import { toast } from "sonner";
 
 // Validation schema
 const formSchema = z.object({
   helpName: z.string().min(1, "Category name is required"),
-  file: z.instanceof(File),
-  docFile: z.instanceof(File),
-  tone: z.string().optional(),
+  file: z.instanceof(File).optional(),
+  docFile: z.instanceof(File).optional(),
+  content: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -39,26 +36,20 @@ type FormData = z.infer<typeof formSchema>;
 const AddJobSearchHelp = ({
   open,
   setOpen,
+  selectedId
 }: {
   open: boolean;
   setOpen: (collapsed: boolean) => void;
+  selectedId?: string
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<File | null>(null);
-  const [value, setValue] = useState();
+  const [createJObSearchHelp] = useCreateJobSearchHelpMutation();
+  const {data: singleJobSearchData, isLoading} = useGetSingleJobSearchHelpQuery(selectedId, {skip: !selectedId});
+  const [updateAddJobSearchHelp] = useUpdateJobSearchHelpMutation();
 
-  const toolbarOptions = [
-    ["image"],
-    [{ header: [1, 2, false] }],
-    ["bold", "italic", "underline"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    [{ align: [] }],
-    [{ color: [] }, { background: [] }],
-  ];
 
-  const moduleConest = {
-    toolbar: toolbarOptions,
-  };
+  console.log(singleJobSearchData?.data);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -66,9 +57,20 @@ const AddJobSearchHelp = ({
       helpName: "",
       file: undefined,
       docFile: undefined,
-      tone: "",
+      content: "",
     },
   });
+
+  const {setValue} = form;
+
+  useEffect(() => {
+    if (singleJobSearchData?.data && selectedId) {
+      setValue("helpName", singleJobSearchData?.data?.name);
+      setValue("content", singleJobSearchData?.data?.content);
+    }else{
+      form.reset();
+    }
+  }, [singleJobSearchData, setValue]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -82,8 +84,8 @@ const AddJobSearchHelp = ({
     const file = event.target.files?.[0];
     if (file) {
       setSelectedDoc(file);
-      form.setValue("file", file);
-      form.clearErrors("file");
+      form.setValue("docFile", file);
+      form.clearErrors("docFile");
     }
   };
 
@@ -100,7 +102,7 @@ const AddJobSearchHelp = ({
   };
   const handleDocDelete = () => {
     setSelectedDoc(null);
-    form.setValue("file", null!);
+    form.setValue("docFile", null!);
     // Reset the file input
     const fileInput = document.getElementById(
       "file-upload"
@@ -110,13 +112,56 @@ const AddJobSearchHelp = ({
     }
   };
 
-  const onSubmit = (data: FormData) => {
+  // Form Submit
+  const onSubmit = async (data: FormData) => {
     // call api for submitting the form
+
+    const formattedData = {
+      name: data.helpName,
+      content: data.content,
+    };
+
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(formattedData));
+    if (data?.file) {
+      formData.append("icon", data?.file);
+    }
+    if (data?.docFile) {
+      formData.append("documents", data?.docFile);
+    }
+
+
+    // ---------------------- if have selected id and single job search help data then update job search help ---------------------- //
+    if (selectedId && singleJobSearchData?.data) {
+      try {
+        await updateAddJobSearchHelp({
+          id: selectedId,
+          data: formData,
+        }).unwrap();
+        toast.success("Job Search Help updated successfully");
+        setOpen(false);
+        return;
+      } catch (error: any) {
+        toast.error(error?.data?.message);
+        return;
+      }
+    }
+
+    if(!data?.file || !data?.docFile){
+      toast.error("Please upload both icon and document");
+      return;
+    }
+
+    try {
+      await createJObSearchHelp(formData).unwrap();
+      toast.success("Job Search Help created successfully");
+      setOpen(false);
+      form.reset();
+    } catch (error: any) {
+      toast.error(error?.data?.message);
+    }
   };
 
-  const onError = (errors: any) => {
-    console.log("Form validation errors:", errors);
-  };
   return (
     <Modal
       open={open}
@@ -147,7 +192,7 @@ const AddJobSearchHelp = ({
             <CardContent className="px-0">
               <Form {...form}>
                 <form
-                  onSubmit={form.handleSubmit(onSubmit, onError)}
+                  onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
                   {/* Upload Image/Icon Section */}
@@ -253,37 +298,31 @@ const AddJobSearchHelp = ({
                       </FormItem>
                     )}
                   />
-
-                  {/* Content */}
+                  {/* Content Section */}
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Label className="text-sm font-medium text-gray-700">
-                        Content
-                      </Label>
-                      <HelpCircle className="w-4 h-4 text-gray-400" />
-                    </div>
-
-                    <ReactQuill
-                      modules={moduleConest}
-                      theme="snow"
-                      value={value}
-                      //  @ts-ignore
-                      onChange={setValue}
-                      placeholder="Write your journal prompt here....."
-                      style={{
-                        border: "1px solid #EFE8FD",
-                        marginTop: "5px",
-                        borderRadius: "10px",
-                        //   backgroundColor: "#68c0a114",
-                        height: "200px",
-                      }}
+                    <FormField
+                      control={form.control}
+                      name="content"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Content</FormLabel>
+                          <FormControl>
+                            <RichTextEditor
+                              value={field.value as string}
+                              onChange={field.onChange}
+                              placeholder="Write your policy description here here....."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
 
                   {/* Upload IUpload Any Resource or Document Section */}
                   <FormField
                     control={form.control}
-                    name="file"
+                    name="docFile"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">
@@ -315,7 +354,7 @@ const AddJobSearchHelp = ({
                                   </label>
                                 </Button>
                                 <span className="text-sm text-gray-500">
-                                  No image
+                                  No file
                                 </span>
                               </div>
                             ) : (
@@ -376,7 +415,7 @@ const AddJobSearchHelp = ({
                       className="w-full bg-teal-600 hover:bg-teal-700 text-white group"
                       disabled={form.formState.isSubmitting}
                     >
-                      {form.formState.isSubmitting ? "Saving..." : "Save"}
+                      {form.formState.isSubmitting ? selectedId ?"Updating...": "Saving..." : selectedId ? "Update": "Save"}
                       <AnimatedArrow />
                     </Button>
                   </div>
@@ -390,6 +429,4 @@ const AddJobSearchHelp = ({
   );
 };
 
-export default dynamic(() => Promise.resolve(AddJobSearchHelp), {
-  ssr: false,
-});
+export default AddJobSearchHelp;

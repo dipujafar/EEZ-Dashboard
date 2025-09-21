@@ -1,5 +1,4 @@
 "use client";
-
 import type React from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -7,9 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, HelpCircle, Upload } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -21,19 +19,16 @@ import {
 import { Modal } from "antd";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
 import { RiCloseLargeLine } from "react-icons/ri";
-import dynamic from "next/dynamic";
-
-// Dynamically import ReactQuill with SSR disabled
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import RichTextEditor from "@/app/(adminDashboard)/manage-content-type/_components/RichTextEditor";
+import { useCreatePolicyAndRightMutation } from "@/redux/api/policyAndRightApi";
+import { Error_Modal } from "@/modals";
+import { toast } from "sonner";
 
 // Validation schema
 const formSchema = z.object({
-  policyTitle: z
-    .string()
-    .min(1, "Category name is required"),
+  policyTitle: z.string().min(1, "Category name is required"),
   file: z.instanceof(File),
-
-  tone: z.string().optional(),
+  policyContent: z.string().min(1, "Policy content is required"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -41,38 +36,21 @@ type FormData = z.infer<typeof formSchema>;
 const AddPolicyRightsLibraryModal = ({
   open,
   setOpen,
- 
 }: {
   open: boolean;
   setOpen: (collapsed: boolean) => void;
-  
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [value, setValue] = useState();
-
-  const toolbarOptions = [
-    ["image"],
-    [{ header: [1, 2, false] }],
-    ["bold", "italic", "underline"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    [{ align: [] }],
-    [{ color: [] }, { background: [] }],
-  ];
-
-  const moduleConest = {
-    toolbar: toolbarOptions,
-  };
+  const [createPolicyRightsLibrary] = useCreatePolicyAndRightMutation();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       policyTitle: "",
       file: undefined,
-      
-      tone: "",
+      policyContent: "",
     },
   });
-
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -95,9 +73,26 @@ const AddPolicyRightsLibraryModal = ({
     }
   };
 
- 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
+    const formattedData = {
+      title: data?.policyTitle,
+      content: data?.policyContent,
+    };
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(formattedData));
+    if (data?.file) {
+      formData.append("image", data?.file);
+    }
+
     // call api for submitting the form
+    try {
+      await createPolicyRightsLibrary(formData).unwrap();
+      toast.success("Policy created successfully");
+      form.reset();
+      setOpen(false);
+    } catch (error: any) {
+      Error_Modal({ title: error?.data?.message });
+    }
   };
 
   const onError = (errors: any) => {
@@ -240,29 +235,23 @@ const AddPolicyRightsLibraryModal = ({
                     )}
                   />
 
-
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Label className="text-sm font-medium text-gray-700">
-                        Policy Content
-                      </Label>
-                      <HelpCircle className="w-4 h-4 text-gray-400" />
-                    </div>
-
-                    <ReactQuill
-                      modules={moduleConest}
-                      theme="snow"
-                      value={value}
-                      //  @ts-ignore
-                      onChange={setValue}
-                      placeholder="Write your journal prompt here....."
-                      style={{
-                        border: "1px solid #EFE8FD",
-                        marginTop: "20px",
-                        borderRadius: "10px",
-                        //   backgroundColor: "#68c0a114",
-                        height: "200px",
-                      }}
+                    <FormField
+                      control={form.control}
+                      name="policyContent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Content</FormLabel>
+                          <FormControl>
+                            <RichTextEditor
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Write your journal prompt here..."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
 
@@ -293,6 +282,4 @@ const AddPolicyRightsLibraryModal = ({
   );
 };
 
-export default dynamic(() => Promise.resolve(AddPolicyRightsLibraryModal), {
-  ssr: false,
-});
+export default AddPolicyRightsLibraryModal;

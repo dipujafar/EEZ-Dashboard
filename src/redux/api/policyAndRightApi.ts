@@ -17,8 +17,16 @@ const policyAndRightApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.policyAndRight],
     }),
+    createPolicyAndRight: builder.mutation({
+      query: (data) => ({
+        url: "/policy-rights",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: [tagTypes.policyAndRight],
+    })
   }),
 });
 
-export const { useGetPolicyAndRightQuery, useDeletePolicyAndRightMutation } =
+export const { useGetPolicyAndRightQuery, useDeletePolicyAndRightMutation, useCreatePolicyAndRightMutation } =
   policyAndRightApi;

@@ -3,11 +3,16 @@ import { Button } from "@/components/ui/button";
 import DataTable from "@/utils/DataTable";
 import { Input, message, Popconfirm, TableProps } from "antd";
 import { CirclePlus, Eye, Search, Trash2 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import AddJobSearchHelp from "./AddJobSearchHelp";
-import { useDeleteJobSearchHelpMutation, useGetJobSearchHelpQuery } from "@/redux/api/jobSearchHelpApi";
+import {
+  useDeleteJobSearchHelpMutation,
+  useGetJobSearchHelpQuery,
+} from "@/redux/api/jobSearchHelpApi";
 import moment from "moment";
 import TableSkeleton from "../Skeletons/TableSkeleton";
+import { useSearchParams } from "next/navigation";
+import { useDebounce } from "use-debounce";
 
 type TDataType = {
   _id?: string;
@@ -19,28 +24,42 @@ type TDataType = {
 
 const JobSearchHelpContainer = () => {
   const [isAddTemplateOpen, setIsOpenAddTemplateModal] = React.useState(false);
-  const [isDetails, setIsDetails] = React.useState(false);
-  const { data: jobSearchHelpData, isLoading } = useGetJobSearchHelpQuery({});
+  const [selectedId, setSelectedId] = useState("");
+  const page = useSearchParams().get("page") || "1";
+  const limit = useSearchParams().get("limit") || "11";
+  const [searchText, setSearchText] = useState("");
+  const [searchValue] = useDebounce(searchText, 500);
+
+  // setQueryData
+  const queries: Record<string, string | number> = {};
+
+  if (page) queries.page = page;
+  if (limit) queries.limit = limit;
+
+  if (searchValue) queries.searchTerm = searchValue;
+
   const [deleteJobSearchHelp] = useDeleteJobSearchHelpMutation();
+  const { data: jobSearchHelpData, isLoading } =
+    useGetJobSearchHelpQuery(queries);
 
-  console.log(jobSearchHelpData?.data?.data);
-
-
-    const confirmBlock = async (id: string) => {
-      try {
-        await deleteJobSearchHelp(id).unwrap();
-        message.success("Successfully deleted.");
-      } catch (error: any) {
-        message.error(error?.data?.message);
-      }
-    };
-
+  const confirmBlock = async (id: string) => {
+    try {
+      await deleteJobSearchHelp(id).unwrap();
+      message.success("Successfully deleted.");
+    } catch (error: any) {
+      message.error(error?.data?.message);
+    }
+  };
 
   const data: TDataType[] = jobSearchHelpData?.data?.data?.map(
     (data: any, inx: number) => ({
       _id: data._id,
       key: inx,
-      serial: `# ${inx + 1}`,
+      serial: `# ${
+        Number(page) === 1
+          ? inx + 1
+          : (Number(page) - 1) * Number(limit) + inx + 1
+      }`,
       help_name: data?.name,
       date: moment(data?.createdAt).format("ll"),
     })
@@ -69,15 +88,11 @@ const JobSearchHelpContainer = () => {
       dataIndex: "action",
       render: (_, rec) => (
         <div className="flex gap-x-2">
-          {" "}
           <Eye
-            onClick={() => {
-              setIsOpenAddTemplateModal(true);
-              setIsDetails(true);
-            }}
+            onClick={() => {setIsOpenAddTemplateModal(true); setSelectedId(rec?._id as string);}}
             size={20}
             color="#78C0A8"
-          />{" "}
+          />
           <Popconfirm
             title="Are you sure?"
             description="You want delete this tag?"
@@ -103,6 +118,8 @@ const JobSearchHelpContainer = () => {
             className="mb-3 h-[35px] "
             prefix={<Search size={18} />}
             placeholder="Search here...."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
         </div>
         {/* ---------------- Add Categories & Scenarios ---------------- */}
@@ -121,10 +138,20 @@ const JobSearchHelpContainer = () => {
         </div>
       </div>
 
-     {isLoading? <TableSkeleton /> : <DataTable columns={columns} data={data}></DataTable>}
+      {isLoading ? (
+        <TableSkeleton />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={data}
+          pageSize={Number(limit)}
+          total={jobSearchHelpData?.data?.meta?.total}
+        ></DataTable>
+      )}
       <AddJobSearchHelp
         open={isAddTemplateOpen}
         setOpen={setIsOpenAddTemplateModal}
+        selectedId={selectedId}
       />
     </div>
   );

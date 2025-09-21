@@ -66,10 +66,7 @@ const AddTemplatesModal = ({
   const [createCommunication] = useCreateCommunicationMutation();
   const { data: singleCommunicationData, isLoading: isLoadingSingle } =
     useGetSingleCommunicationQuery(selectedId, { skip: !selectedId });
-    const [updateCommunication] = useUpdateCommunicationMutation();
-
-
-    
+  const [updateCommunication] = useUpdateCommunicationMutation();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -81,43 +78,35 @@ const AddTemplatesModal = ({
     },
   });
 
-  
-
   // create array for tones
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "tones",
   });
 
-  const {setValue} = form;
+  const { setValue } = form;
 
   // ---------------- set Default value ---------------- //
   useEffect(() => {
     if (singleCommunicationData?.data && selectedId) {
       form.setValue("templateTitle", singleCommunicationData?.data?.title);
-     if (singleCommunicationData?.data?.tone) {
-      setValue(
-        "tones",
-        singleCommunicationData?.data?.tone?.map(
-          (s: string, index: number) => ({
-            id: index.toString(),
-            text: s,
-            checked: true,
-          })
-        )
-      );
-    }
+      if (singleCommunicationData?.data?.tone) {
+        setValue(
+          "tones",
+          singleCommunicationData?.data?.tone?.map(
+            (s: string, index: number) => ({
+              id: index.toString(),
+              text: s,
+              checked: true,
+            })
+          )
+        );
+      }
       form.setValue("message", singleCommunicationData?.data?.message);
-    }else {
+    } else {
       form.reset();
     }
   }, [singleCommunicationData?.data, selectedId]);
-
-
- 
-
-  
-
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -194,8 +183,7 @@ const AddTemplatesModal = ({
       }
     }
 
-
-    if(!data?.file) {
+    if (!data?.file) {
       toast.error("Please upload image or icon");
     }
 
@@ -464,7 +452,13 @@ const AddTemplatesModal = ({
                         className="w-full bg-teal-600 hover:bg-teal-700 text-white group"
                         disabled={form.formState.isSubmitting}
                       >
-                        {form.formState.isSubmitting ? selectedId ? "Saving...": "Updating..." : selectedId ? "Update" : "Save"}
+                        {form.formState.isSubmitting
+                          ? selectedId
+                            ? "Saving..."
+                            : "Updating..."
+                          : selectedId
+                          ? "Update"
+                          : "Save"}
                         <AnimatedArrow />
                       </Button>
                     </div>
