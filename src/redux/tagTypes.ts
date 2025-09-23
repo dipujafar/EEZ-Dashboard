@@ -1,3 +1,5 @@
+
+
 export const tagTypes = {
   auth: "Auth",
   users: "Users",
@@ -15,6 +17,8 @@ export const tagTypes = {
   policyAndRight: "PolicyAndRight",
   manageContent: "ManageContent",
   issueCategory: "IssueCategory",
+  notification: "Notification",
+  guidanceHubSuggestions: "GuidanceHubSuggestions",
 };
 
 export const tagTypesList = [
@@ -35,4 +39,6 @@ export const tagTypesList = [
   tagTypes.policyAndRight,
   tagTypes.manageContent,
   tagTypes.issueCategory,
+  tagTypes.notification,
+  tagTypes.guidanceHubSuggestions
 ];

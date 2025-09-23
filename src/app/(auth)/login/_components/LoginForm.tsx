@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { setUser } from "@/redux/features/authSlice";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
+import { requestFcmToken } from "@/utils/firebase";
 
 type FieldType = {
   email?: string;
@@ -28,10 +29,16 @@ const LoginForm = () => {
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     try {
-      const formattedValues = {
-        email: values.email,
-        password: values.password,
+      const formattedValues: Record<string, string> = {
+        email: values.email as string,
+        password: values.password as string,
       };
+
+      const fcmtoken = await requestFcmToken();
+
+      if (fcmtoken) {
+        formattedValues.fcmToken = fcmtoken;
+      }
 
       const res = await login(formattedValues).unwrap();
       dispatch(

@@ -1,10 +1,9 @@
-"use client";
+"use client";;
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Upload, FileText, Eye, EyeOff } from "lucide-react";
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,8 +25,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
 import { days, TFormData, formSchema, times } from "./schema.utils";
@@ -37,6 +34,7 @@ import {
 } from "@/redux/api/hrAdminApi";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
+import RichTextEditor from "@/app/(adminDashboard)/manage-content-type/_components/RichTextEditor";
 
 export default function AddNewHrServiceForm() {
   const [expertiseInput, setExpertiseInput] = useState("");
@@ -49,8 +47,6 @@ export default function AddNewHrServiceForm() {
   const { data: singleHrAdminData } = useGetSingleHrAdminQuery(id, {
     skip: !id,
   });
-
-  console.log(singleHrAdminData?.data);
 
  
 
@@ -66,11 +62,35 @@ export default function AddNewHrServiceForm() {
       startTime: "",
       endTime: "",
       description: "",
+      phoneNumber: "",
     },
   });
 
   const expertiseAreas = form.watch("expertiseAreas");
   const howHelp = form.watch("howHelp");
+
+  const { setValue } = form;
+
+  //  set default value if here come for edit hr admin data
+  useEffect(() => {
+    if (singleHrAdminData?.data && id) {
+      setValue("email", singleHrAdminData?.data?.user?.email);
+      setValue(
+        "phoneNumber",
+        singleHrAdminData?.data?.user?.profile?.phoneNumber
+      );
+      setValue("expertiseAreas", singleHrAdminData?.data?.expertise);
+      setValue("howHelp", singleHrAdminData?.data?.howHelp?.[0]);
+      setValue("startDay", singleHrAdminData?.data?.availableTime?.[0]?.startDay?.toLowerCase());
+      setValue("endDay", singleHrAdminData?.data?.availableTime?.[0]?.endDay?.toLowerCase());
+      setValue("startTime", singleHrAdminData?.data?.availableTime?.[0]?.startTime);
+      setValue("endTime", singleHrAdminData?.data?.availableTime?.[0]?.endTime);
+      setValue("description", singleHrAdminData?.data?.description);
+      setValue("qualification", singleHrAdminData?.data?.qualification);
+    } else {
+      form.reset();
+    }
+  }, [singleHrAdminData, id]);
 
   const handleAddExpertise = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && expertiseInput.trim()) {
@@ -97,19 +117,22 @@ export default function AddNewHrServiceForm() {
   const handleAddHowHelp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && howHelpInput.trim()) {
       e.preventDefault();
-      const currentAreas = form.getValues("howHelp");
-      if (!currentAreas.includes(howHelpInput.trim())) {
-        form.setValue("howHelp", [...currentAreas, howHelpInput.trim()]);
+      const currentHowHelp = form.getValues("howHelp");
+      // @ts-ignore
+      if (!currentHowHelp.includes(howHelpInput.trim())) {
+        // @ts-ignore
+        form.setValue("howHelp", [...currentHowHelp, howHelpInput.trim()]);
       }
       setHowHelpInput("");
     }
   };
 
   const handleRemoveHowHelp = (area: string) => {
-    const currentAreas = form.getValues("howHelp");
+    const currentHowHelp = form.getValues("howHelp");
     form.setValue(
       "howHelp",
-      currentAreas.filter((a) => a !== area)
+      // @ts-ignore
+      currentHowHelp.filter((a) => a !== area)
     );
   };
 
@@ -129,7 +152,10 @@ export default function AddNewHrServiceForm() {
     if (fileInput) fileInput.value = "";
   };
 
+
+  // handle form submit
   const onSubmit = async (data: TFormData) => {
+    console.log({data})
     if (!data.document) {
       return toast.error("Please upload Upload Document / Certificate file");
     }
@@ -150,61 +176,27 @@ export default function AddNewHrServiceForm() {
       howHelp: data?.howHelp,
     };
 
-    const form = new FormData();
-    form.append("data", JSON.stringify(formattedData));
-    form.append("documents", data?.document as File);
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(formattedData));
+    formData.append("documents", data?.document as File);
 
     try {
-      await createHr(form).unwrap();
+      await createHr(formData).unwrap();
       toast.success("HR admin created successfully");
-      // form.reset();
-    } catch (error) {
-      toast.error("Failed to create HR admin! Please try again.");
+      form.reset();
+    } catch (error: any) {
+      toast.error(error?.data?.message);
     }
-
-  
-    // Handle form submission here
-    // You can use router.push() to navigate after successful submission
   };
 
-  const quillModules = {
-    toolbar: [
-      [{ header: [1, 2, false] }],
-      ["bold", "italic", "underline"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["link"],
-      ["clean"],
-    ],
+  const onError = (errors: any) => {
+    console.log("Form validation errors:", errors);
   };
-
-  //   {
-  // "email": "hrtest@example.com",
-  // "phoneNumber": "0212564556",
-  // "password": "StrongPass123",
-  // "expertise": [
-  // "Recruitment",
-  // "Training",
-  // "Conflict Resolution"
-  // ],
-  // "availableTime": {
-  // "startDay": "2025-09-10",
-  // "endDay": "2025-09-15",
-  // "startTime": "09:00",
-  // "endTime": "17:00"
-  // },
-  // "description": "HR professional with strong expertise in recruitment and employee management.",
-  // "qualification": "MBA in Human Resources",
-  // "howHelp": [
-  // "Recruitment planning",
-  // "Employee training",
-  // "Conflict resolution"
-  // ]
-  // }
 
   return (
     <div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
           {/* Name Field */}
 
           <FormField
@@ -502,7 +494,7 @@ export default function AddNewHrServiceForm() {
                 <FormControl>
                   <Input
                     type="text"
-                    placeholder="Enter Phone Number"
+                    placeholder="Write Qualification"
                     {...field}
                     className="bg-white"
                   />
@@ -512,32 +504,25 @@ export default function AddNewHrServiceForm() {
             )}
           />
 
-          {/* Description */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <div>
-                    <ReactQuill
-                      theme="snow"
+          <div className="space-y-1">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <RichTextEditor
                       value={field.value}
-                      onChange={(value) => {
-                        field.onChange(value);
-                      }}
-                      modules={quillModules}
-                      placeholder="Write your policy description here here..."
-                      className="bg-white"
-                      style={{ height: "300px", overflowY: "hidden" }}
+                      onChange={field.onChange}
+                      placeholder="Write description..."
                     />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="flex flex-col md:flex-row  gap-x-5">
             <div className="flex-1">

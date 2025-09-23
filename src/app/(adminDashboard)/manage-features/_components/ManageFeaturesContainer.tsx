@@ -5,6 +5,7 @@ import WorkplaceJournalContainer from "./WorkplaceJournal/WorkplaceJournalContai
 import CommunicationToolkitContainer from "./CommunicationToolkit/CommunicationToolkitContainer";
 import PolicyRightLibraryContainer from "./PolicyRightsLibrary/PolicyRightLibraryContainer";
 import JobSearchHelpContainer from "./JobSearchHelp/JobSearchHelpContainer";
+import GuidanceSuggestions from "./GuidanceSuggestions/GuidanceSuggestions";
 
 const tabData = [
   {
@@ -13,23 +14,28 @@ const tabData = [
     children: <GuidanceHub />,
   },
   {
-    label: "Workplace Journal",
+    label: "Guidance Suggestions",
     key: "2",
+    children: <GuidanceSuggestions />,
+  },
+  {
+    label: "Workplace Journal",
+    key: "3",
     children: <WorkplaceJournalContainer />,
   },
   {
     label: "Communication Toolkit",
-    key: "3",
+    key: "4",
     children: <CommunicationToolkitContainer />,
   },
   {
     label: "Policy & Rights Library",
-    key: "4",
+    key: "5",
     children: <PolicyRightLibraryContainer />,
   },
   {
     label: "Job Search Help",
-    key: "5",
+    key: "",
     children: <JobSearchHelpContainer />,
   },
 ];

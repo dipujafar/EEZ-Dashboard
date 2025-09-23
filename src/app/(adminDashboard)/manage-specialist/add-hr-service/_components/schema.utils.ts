@@ -17,9 +17,10 @@ export const formSchema = z
     startTime: z.string().min(1, "Start time is required"),
     endTime: z.string().min(1, "End time is required"),
     qualification: z.string().min(1, "Qualification is required"),
+   
     howHelp: z
       .array(z.string())
-      .min(1, "At least one how to help  is required"),
+      .min(1, "At least one how to help  is required")?.optional(),
     description: z
       .string()
       .min(10, "Description must be at least 10 characters"),

@@ -8,6 +8,7 @@ import { useGetAllUsersQuery } from "@/redux/api/usersApi";
 import moment from "moment";
 import { TUserDataType } from "@/types";
 import BlockUser from "@/components/shared/BlockUser";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const RecentlyUser = () => {
   const [open, setOpen] = useState(false);
@@ -47,13 +48,18 @@ const RecentlyUser = () => {
 
       render: (text, record) => (
         <div className="flex   items-center gap-x-2">
-          <Image
-            src={record?.profileImage}
-            alt="profile-picture"
-            width={42}
-            height={42}
-            className="size-16 rounded-full"
-          ></Image>
+          <Avatar>
+            <AvatarImage
+              src={record?.profileImage}
+              alt="profile-picture"
+              width={40}
+              height={40}
+              className="size-10"
+            ></AvatarImage>
+            <AvatarFallback className="bg-gray-300">
+              {record?.name?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
           <p>{text}</p>
         </div>
       ),

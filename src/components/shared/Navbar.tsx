@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 import { useAppDispatch } from "@/redux/hooks";
 import { logout } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
+import { useGetNotificationsQuery, useMarkedRedMutation } from "@/redux/api/notificationApi";
+import { useGetMyProfileQuery } from "@/redux/api/profileApi";
 
 type TNavbarProps = {
   collapsed: boolean;
@@ -30,6 +32,24 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
   const greeting = useGreeting();
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const {data: notificationData} = useGetNotificationsQuery({});
+  const [markAllAsRead] = useMarkedRedMutation();
+  const {data: profileData} = useGetMyProfileQuery({});
+
+  console.log(profileData?.data?.profile);
+
+  // console.log(notificationData?.data);
+  const unReadNotifications = notificationData?.data?.reduce((total: number, notification: any) => total + (notification?.isRead ? 0 : 1), 0);
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead({}).unwrap();
+      router.push("/notifications");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
   return (
     <div className="flex items-center justify-between w-[97%] font-poppins text-text-color xl:px-8 px-4">
       {/* Header left side */}
@@ -48,7 +68,7 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
           <h2 className="text-lg  font-medium">
             Dashboard
             <span className="block  text-sm font-normal">
-              {greeting}, Istiak Ahmed
+              {greeting}, {profileData?.data?.profile?.firstName + " " + profileData?.data?.profile?.lastName} 
             </span>
           </h2>
         </div>
@@ -57,12 +77,12 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
       {/* Header right side */}
       <Flex align="center" gap={20}>
         {/* Notification */}
-        <Link href={"/notifications"}>
+        <div  onClick={handleMarkAllAsRead} className="cursor-pointer">
           <div className="flex justify-center items-center size-10  rounded-full cursor-pointer relative border border-main-color">
             <IoNotificationsOutline size={24} color="#AB9D6E" />
 
-            <Badge
-              count={1}
+           { unReadNotifications > 0 && <Badge
+              count={unReadNotifications > 99 ? "99+" : unReadNotifications}
               style={{
                 border: "none",
                 boxShadow: "none",
@@ -73,9 +93,9 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
                 right: "-8px",
                 fontSize: "10px",
               }}
-            ></Badge>
+            ></Badge>}
           </div>
-        </Link>
+        </div>
 
         {/* user profile */}
         <Menubar className="py-8 border-none shadow-none px-0 border ">
@@ -87,7 +107,7 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
                 )}
               >
                 <Avatar
-                  src={avatarImg.src}
+                  src={profileData?.data?.profile?.profileImage}
                   size={40}
                   className="border border-main-color size-16"
                 ></Avatar>
@@ -97,7 +117,7 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
                     collapsed && "hidden"
                   )}
                 >
-                  Istiak
+                  {profileData?.data?.profile?.firstName + " " + profileData?.data?.profile?.lastName}
                 </h4>
               </div>
             </MenubarTrigger>

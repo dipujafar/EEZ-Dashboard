@@ -62,9 +62,44 @@ export function PeopleIcon({ className }: { className?: string }) {
   );
 }
 
-
 export function EarningGrowthIcon({ className }: { className?: string }) {
   return (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24"><path fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.6 16.733c.234.269.548.456.895.534a1.4 1.4 0 0 0 1.75-.762c.172-.615-.446-1.287-1.242-1.481s-1.41-.861-1.241-1.481a1.4 1.4 0 0 1 1.75-.762c.343.077.654.26.888.524m-1.358 4.017v.617m0-5.939v.725M4 15v4m3-6v6M6 8.5L10.5 5L14 7.5L18 4m0 0h-3.5M18 4v3m2 8a5 5 0 1 1-10 0a5 5 0 0 1 10 0"></path></svg>
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width={30}
+      height={30}
+      viewBox="0 0 24 24"
+    >
+      <path
+        fill="none"
+        stroke="#fff"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M13.6 16.733c.234.269.548.456.895.534a1.4 1.4 0 0 0 1.75-.762c.172-.615-.446-1.287-1.242-1.481s-1.41-.861-1.241-1.481a1.4 1.4 0 0 1 1.75-.762c.343.077.654.26.888.524m-1.358 4.017v.617m0-5.939v.725M4 15v4m3-6v6M6 8.5L10.5 5L14 7.5L18 4m0 0h-3.5M18 4v3m2 8a5 5 0 1 1-10 0a5 5 0 0 1 10 0"
+      ></path>
+    </svg>
+  );
+}
+
+export function Lightbulb({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={21}
+      height={21}
+      viewBox="0 0 21 21"
+      className={className}
+    >
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.5 18.5h4M10.5 5a4.5 4.5 0 0 1 2.001 8.532l-.001.968a2 2 0 1 1-4 0v-.968A4.5 4.5 0 0 1 10.5 5m0-2.5v-1m5 3l1-1m-11 1l-1-1m11 10l1 1m-11-1l-1 1m-1-6h-1m16 0h-1"
+        strokeWidth={1}
+      ></path>
+    </svg>
   );
 }

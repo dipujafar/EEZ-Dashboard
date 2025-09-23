@@ -1,12 +1,13 @@
-import React from 'react';
-import ManageFeaturesContainer from './_components/ManageFeaturesContainer';
+"use client";
+import React from "react";
+import ManageFeaturesContainer from "./_components/ManageFeaturesContainer";
 
 const ManageFeaturesPage = () => {
-    return (
-        <>
-            <ManageFeaturesContainer/>
-        </>
-    );
+  return (
+    <>
+      <ManageFeaturesContainer />
+    </>
+  );
 };
 
 export default ManageFeaturesPage;
