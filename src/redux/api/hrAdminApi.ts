@@ -32,8 +32,16 @@ const hrAdminApi = baseApi.injectEndpoints({
         method: "DELETE",
       }),
       invalidatesTags: [tagTypes.hrAdmin],
+    }),
+    updateHrAdmin: builder.mutation({
+      query: (data) => ({
+        url: `/hr-admin/${data?.id}`,
+        method: "PUT",
+        body: data?.data,
+      }),
+      invalidatesTags: [tagTypes.hrAdmin],
     })
   }),
 });
 
-export const { useGetAllHrAdminsQuery, useCrateHrAdminMutation, useGetSingleHrAdminQuery, useDeleteHrAdminMutation } = hrAdminApi;
+export const { useGetAllHrAdminsQuery, useCrateHrAdminMutation, useGetSingleHrAdminQuery, useDeleteHrAdminMutation, useUpdateHrAdminMutation } = hrAdminApi;

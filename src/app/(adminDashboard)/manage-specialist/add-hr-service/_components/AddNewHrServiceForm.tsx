@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -31,6 +31,7 @@ import { days, TFormData, formSchema, times } from "./schema.utils";
 import {
   useCrateHrAdminMutation,
   useGetSingleHrAdminQuery,
+  useUpdateHrAdminMutation,
 } from "@/redux/api/hrAdminApi";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
@@ -47,8 +48,7 @@ export default function AddNewHrServiceForm() {
   const { data: singleHrAdminData } = useGetSingleHrAdminQuery(id, {
     skip: !id,
   });
-
- 
+  const [updateHrAdmin] = useUpdateHrAdminMutation();
 
   const form = useForm<TFormData>({
     resolver: zodResolver(formSchema),
@@ -80,10 +80,18 @@ export default function AddNewHrServiceForm() {
         singleHrAdminData?.data?.user?.profile?.phoneNumber
       );
       setValue("expertiseAreas", singleHrAdminData?.data?.expertise);
-      setValue("howHelp", singleHrAdminData?.data?.howHelp?.[0]);
-      setValue("startDay", singleHrAdminData?.data?.availableTime?.[0]?.startDay?.toLowerCase());
-      setValue("endDay", singleHrAdminData?.data?.availableTime?.[0]?.endDay?.toLowerCase());
-      setValue("startTime", singleHrAdminData?.data?.availableTime?.[0]?.startTime);
+      if (singleHrAdminData?.data?.howHelp) {
+        setValue("howHelp", singleHrAdminData?.data?.howHelp);
+      }
+      setValue(
+        "startDay",
+        singleHrAdminData?.data?.availableTime?.[0]?.startDay
+      );
+      setValue("endDay", singleHrAdminData?.data?.availableTime?.[0]?.endDay);
+      setValue(
+        "startTime",
+        singleHrAdminData?.data?.availableTime?.[0]?.startTime
+      );
       setValue("endTime", singleHrAdminData?.data?.availableTime?.[0]?.endTime);
       setValue("description", singleHrAdminData?.data?.description);
       setValue("qualification", singleHrAdminData?.data?.qualification);
@@ -119,7 +127,7 @@ export default function AddNewHrServiceForm() {
       e.preventDefault();
       const currentHowHelp = form.getValues("howHelp");
       // @ts-ignore
-      if (!currentHowHelp.includes(howHelpInput.trim())) {
+      if (!currentHowHelp?.includes(howHelpInput.trim())) {
         // @ts-ignore
         form.setValue("howHelp", [...currentHowHelp, howHelpInput.trim()]);
       }
@@ -152,14 +160,8 @@ export default function AddNewHrServiceForm() {
     if (fileInput) fileInput.value = "";
   };
 
-
   // handle form submit
   const onSubmit = async (data: TFormData) => {
-    console.log({data})
-    if (!data.document) {
-      return toast.error("Please upload Upload Document / Certificate file");
-    }
-
     const formattedData = {
       email: data?.email,
       phoneNumber: data?.phoneNumber,
@@ -177,8 +179,34 @@ export default function AddNewHrServiceForm() {
     };
 
     const formData = new FormData();
-    formData.append("data", JSON.stringify(formattedData));
-    formData.append("documents", data?.document as File);
+    if (!singleHrAdminData?.data && !id) {
+      formData.append("data", JSON.stringify(formattedData));
+    }
+    if (data?.document) {
+      formData.append("documents", data?.document as File);
+    }
+
+    // if come for update hr admin data
+    if (singleHrAdminData?.data && id) {
+      const { password, email, ...more } = formattedData;
+      formData.append("data", JSON.stringify(more));
+
+      try {
+        await updateHrAdmin({
+          id: id,
+          data: formData,
+        }).unwrap();
+        toast.success("HR admin updated successfully");
+        return;
+      } catch (error: any) {
+        toast.error(error?.data?.message);
+        return;
+      }
+    }
+
+    if (!data.document) {
+      return toast.error("Please upload Upload Document / Certificate file");
+    }
 
     try {
       await createHr(formData).unwrap();
@@ -196,7 +224,10 @@ export default function AddNewHrServiceForm() {
   return (
     <div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit, onError)}
+          className="space-y-6"
+        >
           {/* Name Field */}
 
           <FormField
@@ -387,7 +418,7 @@ export default function AddNewHrServiceForm() {
                       </FormControl>
                       <SelectContent>
                         {days.map((day) => (
-                          <SelectItem key={day} value={day.toLowerCase()}>
+                          <SelectItem key={day} value={day}>
                             {day}
                           </SelectItem>
                         ))}
@@ -415,7 +446,7 @@ export default function AddNewHrServiceForm() {
                       </FormControl>
                       <SelectContent>
                         {days.map((day) => (
-                          <SelectItem key={day} value={day.toLowerCase()}>
+                          <SelectItem key={day} value={day}>
                             {day}
                           </SelectItem>
                         ))}
@@ -580,16 +611,16 @@ export default function AddNewHrServiceForm() {
                         />
                       </FormControl>
                       <span className="absolute top-1/2 -translate-y-1/2 right-2 ">
-                        {showPassword ? (
+                        {confirmPassword ? (
                           <Eye
                             className="cursor-pointer"
-                            onClick={() => setConfirmPassword(false)}
+                            onClick={() => setConfirmPassword(!confirmPassword)}
                             color="gray"
                           />
                         ) : (
                           <EyeOff
                             className="cursor-pointer"
-                            onClick={() => setConfirmPassword(true)}
+                            onClick={() => setConfirmPassword(!confirmPassword)}
                             color="gray"
                           />
                         )}
@@ -608,7 +639,8 @@ export default function AddNewHrServiceForm() {
             type="submit"
             className="w-full bg-main-color hover:bg-teal-700 text-white py-3 group"
           >
-            Save Changes <AnimatedArrow />
+            {singleHrAdminData?.data && id ? "Update" : "Save"}{" "}
+            <AnimatedArrow />
           </Button>
         </form>
       </Form>

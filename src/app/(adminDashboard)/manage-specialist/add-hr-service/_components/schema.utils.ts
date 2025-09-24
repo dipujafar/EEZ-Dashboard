@@ -20,7 +20,7 @@ export const formSchema = z
    
     howHelp: z
       .array(z.string())
-      .min(1, "At least one how to help  is required")?.optional(),
+      .min(1, "At least one how to help  is required"),
     description: z
       .string()
       .min(10, "Description must be at least 10 characters"),

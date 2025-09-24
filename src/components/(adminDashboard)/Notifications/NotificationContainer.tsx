@@ -8,12 +8,14 @@ import {
 } from "@/redux/api/notificationApi";
 import { cn } from "@/lib/utils";
 import { message, Popconfirm } from "antd";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const NotificationContainer = () => {
-  const { data: allNotificationsData } = useGetNotificationsQuery({});
+  const { data: allNotificationsData, isLoading: loading } = useGetNotificationsQuery({});
   const [deleteNotification] = useDeleteNotificationMutation();
   const [markAllAsRead] = useMarkedRedMutation();
+  const [limit, setLimit] = useState(10);
+   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   const confirmBlock = async (id: string) => {
     try {
@@ -34,6 +36,28 @@ const NotificationContainer = () => {
     };
     markAllNotificationsAsRead();
   }, []);
+
+
+
+    useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting && !loading) {
+          setLimit((prev) => prev + 10);
+        }
+      },
+      { rootMargin: "200px" } // trigger before reaching exact bottom
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current);
+    };
+  }, [loading]);
 
   return (
     <div>
