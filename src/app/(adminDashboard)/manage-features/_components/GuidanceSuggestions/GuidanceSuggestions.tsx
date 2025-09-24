@@ -8,11 +8,9 @@ import { useSearchParams } from "next/navigation";
 import { useDebounce } from "use-debounce";
 import Empty from "@/components/ui/Empty";
 import GuidanceSkeleton from "../GuidanceHub/Skeletons/Skeleton";
-import AddCategoriesScenariosModal from "../GuidanceHub/AddCategoriesScenariosModal";
 import AddSuggestionFeatures from "./AddSuggestionFeatures";
 
 const GuidanceSuggestions = () => {
-  const [isOpenAddCategories, setIsOpenAddCategories] = useState(false);
   const page = useSearchParams()?.get("page") || "1";
   const limit = 9;
   const [searchText, setSearchText] = useState("");
@@ -66,10 +64,6 @@ const GuidanceSuggestions = () => {
           pageSize={limit}
         />
       </div>
-      <AddCategoriesScenariosModal
-        open={isOpenAddCategories}
-        setOpen={setIsOpenAddCategories}
-      />
     </div>
   );
 };

@@ -53,6 +53,7 @@ export default function AddSuggestionFeatures({ data }: { data: any }) {
         open={openEditModal}
         setOpen={setOpenEditModal}
         selectedId={selectedId}
+        scenario={scenario}
       />
     </div>
   );

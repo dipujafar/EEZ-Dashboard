@@ -21,14 +21,15 @@ import {
 import { Modal } from "antd";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
 import { RiCloseLargeLine } from "react-icons/ri";
-import {
-  useCreateGuidanceHubMutation,
-  useGetSingleGuidanceHubQuery,
-  useUpdateGuidanceHubMutation,
-} from "@/redux/api/guidanceHubApi";
+import { useUpdateGuidanceHubMutation } from "@/redux/api/guidanceHubApi";
 import { toast } from "sonner";
 import { AddCategoryModalSkelton } from "../GuidanceHub/Skeletons/AddCategoryModalSkelton";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  useCreateGuidanceHubSuggestionMutation,
+  useGetSpecificGuidanceHubSuggestionQuery,
+  useUpdateSpecificGuidanceHubSuggestionMutation,
+} from "@/redux/api/guidanceSuggestionApi";
 
 // Validation schema
 const formSchema = z.object({
@@ -56,18 +57,26 @@ const AddGuidanceSuggestionModal = ({
   open,
   setOpen,
   selectedId,
+  scenario,
 }: {
   open: boolean;
   setOpen: (collapsed: boolean) => void;
   selectedId?: string;
+  scenario?: string;
 }) => {
-  
-  const [createGuidanceHub] = useCreateGuidanceHubMutation();
-  const [updateGuidanceHub] = useUpdateGuidanceHubMutation();
-  const { data: singleGuidanceHubData, isLoading: isLoadingSingle } =
-    useGetSingleGuidanceHubQuery(selectedId, {
-      skip: !selectedId,
-    });
+  const [createGuidanceHubSuggestion] =
+    useCreateGuidanceHubSuggestionMutation();
+  const [suggestionId, setSuggestionId] = useState<string | null>(null);
+  const [updateGuidanceHubSuggestion] = useUpdateSpecificGuidanceHubSuggestionMutation();
+  const { data: singleGuidanceHubSuggestionData, isLoading: isLoadingSingle } =
+    useGetSpecificGuidanceHubSuggestionQuery(
+      { category: selectedId, scenario },
+      {
+        skip: !selectedId && !scenario,
+      }
+    );
+
+  console.log({suggestionId});
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -87,24 +96,25 @@ const AddGuidanceSuggestionModal = ({
 
   const { setValue } = form;
 
-  // a to function to make url to file
-  const urlToFile = async (url: string, filename: string): Promise<File> => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch image");
-    const blob = await res.blob();
-    return new File([blob], filename, { type: blob.type });
-  };
-
   //  set default for category update time
   useEffect(() => {
-    if (singleGuidanceHubData?.data?.name) {
-      setValue("suggestion", singleGuidanceHubData?.data?.name);
+    if (singleGuidanceHubSuggestionData?.data?._id) {
+      setSuggestionId(singleGuidanceHubSuggestionData?.data?._id);
+    }
+    if (singleGuidanceHubSuggestionData?.data?.suggestion) {
+      setValue("suggestion", singleGuidanceHubSuggestionData?.data?.suggestion);
+    }
+    if (singleGuidanceHubSuggestionData?.data?.suggestedScript) {
+      setValue(
+        "suggestedScript",
+        singleGuidanceHubSuggestionData?.data?.suggestedScript
+      );
     }
 
-    if (singleGuidanceHubData?.data?.scenario) {
+    if (singleGuidanceHubSuggestionData?.data?.tips) {
       setValue(
         "tips",
-        singleGuidanceHubData?.data?.scenario.map(
+        singleGuidanceHubSuggestionData?.data?.tips?.map(
           (s: string, index: number) => ({
             id: index.toString(),
             text: s,
@@ -112,12 +122,10 @@ const AddGuidanceSuggestionModal = ({
           })
         )
       );
+    } else {
+      form.reset();
     }
-
-  
-  }, [singleGuidanceHubData, setValue]);
-
-
+  }, [singleGuidanceHubSuggestionData, selectedId, scenario]);
 
   const addScenario = () => {
     const newScenarioText = form.getValues("newTips");
@@ -126,7 +134,7 @@ const AddGuidanceSuggestionModal = ({
       append({
         id: newId,
         text: newScenarioText.trim(),
-        checked: false,
+        checked: true,
       });
       form.setValue("newTips", "");
     }
@@ -148,25 +156,21 @@ const AddGuidanceSuggestionModal = ({
   const onSubmit = async (data: FormData) => {
     // --------------------making the formatted data ---------------
     const formattedData = {
-      name: data.suggestion,
-      scenario: data?.tips?.filter((s) => s.checked).map((s) => s.text),
+      suggestion: data.suggestion,
+      tips: data?.tips?.filter((s) => s.checked).map((s) => s.text),
+      suggestedScript: data?.suggestedScript,
+      category: selectedId,
+      scenario: scenario,
     };
 
-    // ------------------ create form data  --------------
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(formattedData));
-    if (data?.file) {
-      formData.append("image", data?.file);
-    }
-
     //------------------ if have selected id and single guidance hub data then update guidance hub
-    if (selectedId && singleGuidanceHubData?.data?.name) {
+    if (suggestionId && singleGuidanceHubSuggestionData?.data) {
       try {
-        await updateGuidanceHub({
-          id: selectedId,
-          data: formData,
+        await updateGuidanceHubSuggestion({
+          id: suggestionId,
+          data: formattedData,
         }).unwrap();
-        toast.success("Guidance Hub updated successfully");
+        toast.success("Guidance Hub suggestion updated successfully");
         setOpen(false);
         return;
       } catch (error: any) {
@@ -175,15 +179,12 @@ const AddGuidanceSuggestionModal = ({
       }
     }
 
-    if (!data?.file) {
-      toast.error("Please upload image/icon for guidance hub");
-      return;
-    }
+   
 
     // -----------------------  create a new guidance hub
     try {
-      await createGuidanceHub(formData).unwrap();
-      toast.success("Guidance Hub created successfully");
+      await createGuidanceHubSuggestion(formattedData).unwrap();
+      toast.success("Guidance Hub Suggestion created successfully");
       setOpen(false);
     } catch (error: any) {
       toast.error(error?.data?.message);
@@ -344,7 +345,7 @@ const AddGuidanceSuggestionModal = ({
                               <Textarea
                                 placeholder="Enter Suggestion Scripts"
                                 {...field}
-                                className="w-full"
+                                className="w-full min-h-[120px]"
                               />
                             </FormControl>
                             <FormMessage />
@@ -366,10 +367,10 @@ const AddGuidanceSuggestionModal = ({
                           disabled={form.formState.isSubmitting}
                         >
                           {form.formState.isSubmitting
-                            ? selectedId
+                            ? singleGuidanceHubSuggestionData?.data
                               ? "Updating..."
                               : "Saving..."
-                            : selectedId
+                            : singleGuidanceHubSuggestionData?.data
                             ? "Update"
                             : "Save"}
                           <AnimatedArrow />
