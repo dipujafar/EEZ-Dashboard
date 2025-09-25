@@ -15,7 +15,6 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { ChevronRight } from "lucide-react";
-import avatarImg from "@/assets/image/profile.png";
 import { cn } from "@/lib/utils";
 import { useAppDispatch } from "@/redux/hooks";
 import { logout } from "@/redux/features/authSlice";

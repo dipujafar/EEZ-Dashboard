@@ -39,25 +39,25 @@ const NotificationContainer = () => {
 
 
 
-    useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const target = entries[0];
-        if (target.isIntersecting && !loading) {
-          setLimit((prev) => prev + 10);
-        }
-      },
-      { rootMargin: "200px" } // trigger before reaching exact bottom
-    );
+  //   useEffect(() => {
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       const target = entries[0];
+  //       if (target.isIntersecting && !loading) {
+  //         setLimit((prev) => prev + 10);
+  //       }
+  //     },
+  //     { rootMargin: "200px" } // trigger before reaching exact bottom
+  //   );
 
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
-    }
+  //   if (loaderRef.current) {
+  //     observer.observe(loaderRef.current);
+  //   }
 
-    return () => {
-      if (loaderRef.current) observer.unobserve(loaderRef.current);
-    };
-  }, [loading]);
+  //   return () => {
+  //     if (loaderRef.current) observer.unobserve(loaderRef.current);
+  //   };
+  // }, [loading]);
 
   return (
     <div>

@@ -1,13 +1,11 @@
-"use client";
+"use client";;
 import { Button, ConfigProvider, Form, Input } from "antd";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaArrowLeft } from "react-icons/fa6";
 import { FiEdit } from "react-icons/fi";
-import profile from "@/assets/image/adminProfile.png";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Camera, Trash2, X } from "lucide-react";
+import { Camera, Trash2 } from "lucide-react";
 import {
   useGetMyProfileQuery,
   useUpdateProfileMutation,
@@ -36,7 +34,7 @@ const PersonalInformationContainer = () => {
       },
     };
 
-    console.log(fileName);
+    
 
     const formData = new FormData();
     formData.append("data", JSON.stringify(formattedData));

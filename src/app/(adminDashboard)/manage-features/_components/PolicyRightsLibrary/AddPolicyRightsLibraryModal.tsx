@@ -121,10 +121,10 @@ const AddPolicyRightsLibraryModal = ({
       }
     }
 
-    if (!data?.file) {
-      toast.error("Please upload an image or icon");
-      return;
-    }
+    // if (!data?.file) {
+    //   toast.error("Please upload an image or icon");
+    //   return;
+    // }
 
     // call api for submitting the form
     try {

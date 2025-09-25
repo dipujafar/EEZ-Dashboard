@@ -183,9 +183,9 @@ const AddTemplatesModal = ({
       }
     }
 
-    if (!data?.file) {
-      toast.error("Please upload image or icon");
-    }
+    // if (!data?.file) {
+    //   toast.error("Please upload image or icon");
+    // }
 
     try {
       await createCommunication(formData).unwrap();

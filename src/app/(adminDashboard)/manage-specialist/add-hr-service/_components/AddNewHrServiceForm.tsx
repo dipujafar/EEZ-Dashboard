@@ -36,6 +36,7 @@ import {
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import RichTextEditor from "@/app/(adminDashboard)/manage-content-type/_components/RichTextEditor";
+import { cn } from "@/lib/utils";
 
 export default function AddNewHrServiceForm() {
   const [expertiseInput, setExpertiseInput] = useState("");
@@ -204,9 +205,9 @@ export default function AddNewHrServiceForm() {
       }
     }
 
-    if (!data.document) {
-      return toast.error("Please upload Upload Document / Certificate file");
-    }
+    // if (!data.document) {
+    //   return toast.error("Please upload Upload Document / Certificate file");
+    // }
 
     try {
       await createHr(formData).unwrap();
@@ -240,7 +241,8 @@ export default function AddNewHrServiceForm() {
                   <Input
                     placeholder="Enter E-mail"
                     {...field}
-                    className="bg-white"
+                    readOnly={singleHrAdminData?.data && id ? true : false}
+                    className={"bg-white"}
                   />
                 </FormControl>
                 <FormMessage />
@@ -555,7 +557,7 @@ export default function AddNewHrServiceForm() {
             />
           </div>
 
-          <div className="flex flex-col md:flex-row  gap-x-5">
+          <div className={cn("flex flex-col md:flex-row  gap-x-5", (singleHrAdminData?.data && id) && "hidden")}>
             <div className="flex-1">
               <FormField
                 control={form.control}

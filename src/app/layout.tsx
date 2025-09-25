@@ -17,9 +17,9 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: {
     default: "Admin Dashboard | EEZ",
-    template: "%s | SoleSwap",
+    template: "%s | EEZ",
   },
-  description: "This is Official Application Dashboard for SoleSwap",
+  description: "This is Official Application Dashboard for EEZ",
 };
 
 export default function RootLayout({

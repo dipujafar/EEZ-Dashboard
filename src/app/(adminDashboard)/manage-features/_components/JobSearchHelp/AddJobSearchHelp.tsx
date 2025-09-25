@@ -147,10 +147,10 @@ const AddJobSearchHelp = ({
       }
     }
 
-    if(!data?.file || !data?.docFile){
-      toast.error("Please upload both icon and document");
-      return;
-    }
+    // if(!data?.file || !data?.docFile){
+    //   toast.error("Please upload both icon and document");
+    //   return;
+    // }
 
     try {
       await createJObSearchHelp(formData).unwrap();

@@ -211,10 +211,10 @@ const AddCategoriesScenariosModal = ({
       }
     }
 
-    if (!data?.file) {
-      toast.error("Please upload image/icon for guidance hub");
-      return;
-    }
+    // if (!data?.file) {
+    //   toast.error("Please upload image/icon for guidance hub");
+    //   return;
+    // }
 
     // -----------------------  create a new guidance hub
     try {

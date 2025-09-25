@@ -5,7 +5,7 @@ import logo from "@/assets/image/logo.png"
 
 export const metadata: Metadata = {
   title: "Admin Login",
-  description: "Admin login for SoleSwap.",
+  description: "Admin login for EEZ.",
 };
 
 const LoginPage = () => {
