@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { setUser } from "@/redux/features/authSlice";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
-import { requestFcmToken } from "@/utils/firebase";
+// import { requestFcmToken } from "@/utils/firebase";
 
 type FieldType = {
   email?: string;
@@ -34,11 +34,11 @@ const LoginForm = () => {
         password: values.password as string,
       };
 
-      const fcmtoken = await requestFcmToken();
+      // const fcmtoken = await requestFcmToken();
 
-      if (fcmtoken) {
-        formattedValues.fcmToken = fcmtoken;
-      }
+      // if (fcmtoken) {
+      //   formattedValues.fcmToken = fcmtoken;
+      // }
 
       const res = await login(formattedValues).unwrap();
       dispatch(
