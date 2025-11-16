@@ -16,7 +16,6 @@ const ForgetPassForm = () => {
 
   //handle password change
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    console.log("Success:", values);
 
     try {
       const res = await forgetPass(values).unwrap();
