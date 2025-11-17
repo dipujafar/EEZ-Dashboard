@@ -15,6 +15,8 @@ const RecentlyUser = () => {
   const { data: usersData, isLoading } = useGetAllUsersQuery({ limit: 5 });
   const [currentData, setCurrentData] = useState<TUserDataType | null>(null);
 
+  console.log(usersData);
+
   // if(isLoading){
 
   //   return <UserTableSkeleton />
@@ -27,11 +29,11 @@ const RecentlyUser = () => {
       name: data?.profile?.firstName + " " + data?.profile?.lastName,
       email: data?.email,
       profileImage: data?.profile?.profileImage,
-      location: "Dhanmondi",
       date: moment(data?.createdAt).format("ll"),
       type: data?.role,
-      contactNumber: data?.profile?.contactNumber,
+      contactNumber: data?.profile?.phoneNumber,
       status: data?.status,
+      companyName:data?.profile?.companyName
     })
   );
 

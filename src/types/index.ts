@@ -25,6 +25,7 @@ export type TUserDataType = {
   profileImage: string;
   contactNumber: string;
   status: string;
+  companyName: string
 };
 
 

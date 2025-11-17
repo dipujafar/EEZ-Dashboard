@@ -44,11 +44,11 @@ const CustomersTable = () => {
       name: data?.profile?.firstName + " " + data?.profile?.lastName,
       email: data?.email,
       profileImage: data?.profile?.profileImage,
-      location: "Dhanmondi",
       date: moment(data?.createdAt).format("ll"),
       type: data?.role,
       contactNumber: data?.profile?.contactNumber,
       status: data?.status,
+      companyName:data?.profile?.companyName
     })
   );
 

@@ -66,33 +66,33 @@ const UserDetails = ({ open, setOpen, data }: TPropsType) => {
             <p className="font-medium">{currentData?.date}</p>
           </div>
 
-          <div className="flex justify-between bg-[#21424617] py-3 px-2 border-b">
+          {/* <div className="flex justify-between bg-[#21424617] py-3 px-2 border-b">
             <h4>Location </h4>
             <p className="font-medium">Ontario, USA</p>
-          </div>
-          <div className="flex justify-between  py-3 px-2 border-b">
+          </div> */}
+          {/* <div className="flex justify-between  py-3 px-2 border-b">
             <h4>Account Type </h4>
             <p className="font-medium">User</p>
-          </div>
-          <div className="flex justify-between  bg-[#21424617] py-3 px-2 border-b">
+          </div> */}
+          <div className="flex justify-between bg-[#21424617]   py-3 px-2 border-b">
             <h4>Role</h4>
-            <p className="font-medium">Employee</p>
+            <p className="font-medium">{data?.type}</p>
           </div>
-          <div className="flex justify-between   py-3 px-2 border-b">
+          {/* <div className="flex justify-between bg-[#21424617]   py-3 px-2 border-b">
             <h4>Subscription Plan </h4>
             <p className="font-medium">Basic</p>
-          </div>
-          <div className="flex justify-between  bg-[#21424617] py-3 px-2 border-b">
+          </div> */}
+          <div className="flex justify-between   py-3 px-2 border-b">
             <h4>Company name </h4>
-            <p className="font-medium">N/A</p>
+            <p className="font-medium">{data?.companyName}</p>
           </div>
-          <div className="flex justify-between py-3 px-2 border-b">
+          {/* <div className="flex justify-between bg-[#21424617] py-3 px-2 border-b">
             <h4>Streak Progress </h4>
             <p className="font-medium">5 days streak</p>
-          </div>
-          <div className="flex justify-between  bg-[#21424617] py-3 px-2 border-b">
+          </div> */}
+          <div className="flex justify-between  bg-[#21424617]  py-3 px-2 border-b">
             <h4>Status </h4>
-            <p className="font-medium">Active</p>
+            <p className="font-medium">{data?.status}</p>
           </div>
         </div>
       </div>
