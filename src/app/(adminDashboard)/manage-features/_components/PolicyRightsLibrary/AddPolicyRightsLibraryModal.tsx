@@ -215,7 +215,7 @@ const AddPolicyRightsLibraryModal = ({
         await createPolicy(formData).unwrap();
         toast.success("Policy created successfully");
         form.reset();
-        form.setValue()
+        // form.setValue("category", null);
       }
       setOpen(false);
       form.reset();
