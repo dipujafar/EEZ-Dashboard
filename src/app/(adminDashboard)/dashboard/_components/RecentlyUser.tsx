@@ -9,18 +9,17 @@ import moment from "moment";
 import { TUserDataType } from "@/types";
 import BlockUser from "@/components/shared/BlockUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserTableSkeleton from "@/skeleton/UserTableSkeleton";
 
 const RecentlyUser = () => {
   const [open, setOpen] = useState(false);
   const { data: usersData, isLoading } = useGetAllUsersQuery({ limit: 5 });
   const [currentData, setCurrentData] = useState<TUserDataType | null>(null);
 
-  console.log(usersData);
+  if(isLoading){
 
-  // if(isLoading){
-
-  //   return <UserTableSkeleton />
-  // }
+    return <UserTableSkeleton length={5} />
+  }
 
   const data: TUserDataType[] = usersData?.data?.data?.map(
     (data: any, inx: number) => ({

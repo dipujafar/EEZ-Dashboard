@@ -11,6 +11,7 @@ import { useSearchParams } from "next/navigation";
 import { useDebounce } from "use-debounce";
 import BlockUser from "@/components/shared/BlockUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserTableSkeleton from "@/skeleton/UserTableSkeleton";
 
 const CustomersTable = () => {
   const [open, setOpen] = useState(false);
@@ -32,15 +33,18 @@ const CustomersTable = () => {
 
   // ==================================================================================
 
-  // if(isLoading){
+  if (isLoading) {
 
-  //   return <UserTableSkeleton />
-  // }
+    return <UserTableSkeleton />
+  }
 
   const data: TUserDataType[] = usersData?.data?.data?.map(
     (data: any, inx: number) => ({
       id: data?._id,
-      serial: inx + 1,
+      serial: `# ${Number(page) === 1
+        ? inx + 1
+        : (Number(page) - 1) * Number(limit) + inx + 1
+        }`,
       name: data?.profile?.firstName + " " + data?.profile?.lastName,
       email: data?.email,
       profileImage: data?.profile?.profileImage,
@@ -48,7 +52,7 @@ const CustomersTable = () => {
       type: data?.role,
       contactNumber: data?.profile?.contactNumber,
       status: data?.status,
-      companyName:data?.profile?.companyName
+      companyName: data?.profile?.companyName
     })
   );
 

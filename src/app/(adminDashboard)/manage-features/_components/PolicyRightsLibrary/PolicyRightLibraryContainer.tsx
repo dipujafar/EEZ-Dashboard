@@ -41,6 +41,8 @@ const PolicyRightLibraryContainer = () => {
 
   const { data: policyAndRightData, isLoading } = useGetPolicyAndRightQuery(queries);
 
+  console.log(policyAndRightData);
+
   const data: TDataType[] = policyAndRightData?.data?.data?.map(
     (data: any, inx: number) => ({
       id: data?._id,
@@ -51,6 +53,7 @@ const PolicyRightLibraryContainer = () => {
           : (Number(page) - 1) * Number(limit) + inx + 1
       }`,
       policy_name: data?.title,
+      category: data?.category,
       date: moment(data?.createdAt).format("ll"),
     })
   );
@@ -74,6 +77,15 @@ const PolicyRightLibraryContainer = () => {
       title: "Policy name",
       dataIndex: "policy_name",
       align: "center",
+    },
+    {
+      title: "Category",
+      dataIndex: "category",
+      align: "center",
+      render: (_, rec) => {
+        // @ts-ignore
+        return <span className="capitalize">{rec?.category}</span>;
+      },
     },
 
     {
