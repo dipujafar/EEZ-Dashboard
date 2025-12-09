@@ -124,6 +124,7 @@ const PersonalInformationContainer = () => {
                 <Avatar className="size-36 rounded-full flex justify-center items-center">
                   <AvatarImage
                     src={imageUrl || profileData?.data?.profile?.profileImage}
+                    className="object-cover"
                   />
                   <AvatarFallback className="bg-gray-300 text-3xl">
                     {profileData?.data?.profile?.firstName?.charAt(0) +
