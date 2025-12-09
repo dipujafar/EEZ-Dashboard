@@ -16,11 +16,12 @@ import {
 } from "@/components/ui/menubar";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAppDispatch } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { logout } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
 import { useGetNotificationsQuery, useMarkedRedMutation } from "@/redux/api/notificationApi";
 import { useGetMyProfileQuery } from "@/redux/api/profileApi";
+import { Skeleton } from "../ui/skeleton";
 
 type TNavbarProps = {
   collapsed: boolean;
@@ -31,11 +32,13 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
   const greeting = useGreeting();
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const {data: notificationData} = useGetNotificationsQuery({});
+  const { data: notificationData } = useGetNotificationsQuery({});
   const [markAllAsRead] = useMarkedRedMutation();
-  const {data: profileData} = useGetMyProfileQuery({});
+  const user = useAppSelector((state) => state.auth.user);
+  const { data: profileData,  isLoading } = useGetMyProfileQuery({}, {
+    skip: !user
+  });
 
-  console.log(profileData?.data?.profile);
 
   // console.log(notificationData?.data);
   const unReadNotifications = notificationData?.data?.reduce((total: number, notification: any) => total + (notification?.isRead ? 0 : 1), 0);
@@ -48,7 +51,7 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
       console.log(error);
     }
   };
-  
+
   return (
     <div className="flex items-center justify-between w-[97%] font-poppins text-text-color xl:px-8 px-4">
       {/* Header left side */}
@@ -67,7 +70,7 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
           <h2 className="text-lg  font-medium">
             Dashboard
             <span className="block  text-sm font-normal">
-              {greeting}, {profileData?.data?.profile?.firstName + " " + profileData?.data?.profile?.lastName} 
+              {greeting}, {profileData?.data?.profile?.firstName}
             </span>
           </h2>
         </div>
@@ -76,11 +79,11 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
       {/* Header right side */}
       <Flex align="center" gap={20}>
         {/* Notification */}
-        <div  onClick={handleMarkAllAsRead} className="cursor-pointer">
+        <div onClick={handleMarkAllAsRead} className="cursor-pointer">
           <div className="flex justify-center items-center size-10  rounded-full cursor-pointer relative border border-main-color">
             <IoNotificationsOutline size={24} color="#AB9D6E" />
 
-           { unReadNotifications > 0 && <Badge
+            {unReadNotifications > 0 && <Badge
               count={unReadNotifications > 99 ? "99+" : unReadNotifications}
               style={{
                 border: "none",
@@ -116,7 +119,7 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
                     collapsed && "hidden"
                   )}
                 >
-                  {profileData?.data?.profile?.firstName + " " + profileData?.data?.profile?.lastName}
+                  {isLoading ? <Skeleton className="h-8 w-28" /> : profileData?.data?.profile?.firstName?.split(" ")?.[0] + " " + profileData?.data?.profile?.lastName?.split(" ")?.[0]}
                 </h4>
               </div>
             </MenubarTrigger>
