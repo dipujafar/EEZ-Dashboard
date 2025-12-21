@@ -143,6 +143,11 @@
   box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.06)
 }
 
+/* scroll related  */
+.scroll-hide::-webkit-scrollbar {
+  width: 0px;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

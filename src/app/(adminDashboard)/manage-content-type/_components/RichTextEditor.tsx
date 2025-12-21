@@ -40,7 +40,8 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
         modules={modules}
         formats={formats}
         placeholder={placeholder}
-        style={{ height: '200px', marginBottom: '42px', overflow: 'hidden' }}
+        style={{ height: '200px', marginBottom: '42px', overflow: 'auto' }}
+        className='scroll-hide'
       />
     </div>
   );
