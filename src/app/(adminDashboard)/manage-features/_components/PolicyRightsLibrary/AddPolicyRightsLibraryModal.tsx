@@ -32,7 +32,7 @@ import { Error_Modal } from "@/modals";
 import { toast } from "sonner";
 
 // -----------------------------
-// 🔵 ZOD VALIDATION SCHEMA
+//  ZOD VALIDATION SCHEMA
 // -----------------------------
 const formSchema = z
   .object({
@@ -97,7 +97,7 @@ type FormData = z.infer<typeof formSchema>;
 
 
 // -----------------------------
-// 🔵 MAIN COMPONENT
+//  MAIN COMPONENT
 // -----------------------------
 const AddPolicyRightsLibraryModal = ({
   open,
@@ -118,7 +118,7 @@ const AddPolicyRightsLibraryModal = ({
   const [updatePolicy] = useUpdatePolicyAndRightMutation();
 
   // -----------------------------
-  // 🔵 REACT-HOOK-FORM SETUP
+  //  REACT-HOOK-FORM SETUP
   // -----------------------------
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -137,7 +137,7 @@ const AddPolicyRightsLibraryModal = ({
   const { setValue } = form;
 
   // -----------------------------
-  // 🔵 LOAD DATA IN EDIT MODE
+  //  LOAD DATA IN EDIT MODE
   // -----------------------------
   useEffect(() => {
     const d = singleData?.data;
@@ -158,10 +158,10 @@ const AddPolicyRightsLibraryModal = ({
     } else {
       form.reset();
     }
-  }, [singleData, selectedId]);
+  }, [singleData, selectedId, open]);
 
   // -----------------------------
-  // 🔵 FILE HANDLING
+  //  FILE HANDLING
   // -----------------------------
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -180,7 +180,7 @@ const AddPolicyRightsLibraryModal = ({
   };
 
   // -----------------------------
-  // 🔵 SUBMIT HANDLER
+  //  SUBMIT HANDLER
   // -----------------------------
   const onSubmit = async (data: FormData) => {
     const payload: any = {
@@ -225,7 +225,7 @@ const AddPolicyRightsLibraryModal = ({
   };
 
   // -----------------------------
-  // 🔵 RENDER
+  //  RENDER
   // -----------------------------
   return (
     <Modal
