@@ -1,5 +1,5 @@
 import { TUserDataType } from "@/types";
-import { Avatar, Modal } from "antd";
+import { Avatar, Image, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { RiCloseLargeLine } from "react-icons/ri";
 
@@ -43,7 +43,7 @@ const UserDetails = ({ open, setOpen, data }: TPropsType) => {
           </div>
         </div>
         <div className="w-fit mx-auto relative">
-          <Avatar src={currentData?.profileImage} size={150} />
+          <Image src={currentData?.profileImage} width={150} height={150} className="rounded-full" />
         </div>
         <div className="mt-10  ">
           <div className="flex justify-between bg-[#21424617] py-3 px-2 border-b ">

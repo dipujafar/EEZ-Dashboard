@@ -41,7 +41,7 @@ const CustomersTable = () => {
   const data: TUserDataType[] = usersData?.data?.data?.map(
     (data: any, inx: number) => ({
       id: data?._id,
-      serial: `# ${Number(page) === 1
+      serial: `${Number(page) === 1
         ? inx + 1
         : (Number(page) - 1) * Number(limit) + inx + 1
         }`,
@@ -69,7 +69,7 @@ const CustomersTable = () => {
 
       render: (text, record) => (
         <div className="flex   items-center gap-x-2">
-          <Avatar>
+          {record?.profileImage ? <Image src={record?.profileImage} alt="profile-picture" width={40} height={40} className="size-10 rounded-full" /> : <Avatar>
             <AvatarImage
               src={record?.profileImage}
               alt="profile-picture"
@@ -80,7 +80,7 @@ const CustomersTable = () => {
             <AvatarFallback className="bg-gray-300">
               {record?.name?.charAt(0)}
             </AvatarFallback>
-          </Avatar>
+          </Avatar>}
           <p>{text}</p>
         </div>
       ),

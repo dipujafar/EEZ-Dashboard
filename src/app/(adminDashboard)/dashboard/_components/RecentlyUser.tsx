@@ -16,7 +16,7 @@ const RecentlyUser = () => {
   const { data: usersData, isLoading } = useGetAllUsersQuery({ limit: 5 });
   const [currentData, setCurrentData] = useState<TUserDataType | null>(null);
 
-  if(isLoading){
+  if (isLoading) {
 
     return <UserTableSkeleton length={5} />
   }
@@ -32,7 +32,7 @@ const RecentlyUser = () => {
       type: data?.role,
       contactNumber: data?.profile?.phoneNumber,
       status: data?.status,
-      companyName:data?.profile?.companyName
+      companyName: data?.profile?.companyName
     })
   );
 
@@ -49,7 +49,7 @@ const RecentlyUser = () => {
 
       render: (text, record) => (
         <div className="flex   items-center gap-x-2">
-          <Avatar>
+          {record?.profileImage ? <Image src={record?.profileImage} alt="profile-picture" width={40} height={40} className="size-10 rounded-full" /> : <Avatar>
             <AvatarImage
               src={record?.profileImage}
               alt="profile-picture"
@@ -60,7 +60,7 @@ const RecentlyUser = () => {
             <AvatarFallback className="bg-gray-300">
               {record?.name?.charAt(0)}
             </AvatarFallback>
-          </Avatar>
+          </Avatar>}
           <p>{text}</p>
         </div>
       ),

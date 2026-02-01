@@ -15,6 +15,7 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
 
   const modules = {
     toolbar: [
+      ['image'],
       [{ 'size': ['small', false, 'large'] }],
       ['bold', 'italic', 'underline'],
       [{ 'list': 'ordered'}, { 'list': 'bullet' }],
@@ -25,7 +26,7 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
   };
 
   const formats = [
-    'size', 'bold', 'italic', 'underline', 
+   'image' ,'size', 'bold', 'italic', 'underline', 
     'list', 'bullet', 'indent', 'link'
   ];
 
@@ -40,7 +41,7 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
         modules={modules}
         formats={formats}
         placeholder={placeholder}
-        style={{ height: '200px', marginBottom: '42px', overflow: 'auto' }}
+        style={{ height: '300px', marginBottom: '42px', overflow: 'auto' }}
         className='scroll-hide'
       />
     </div>
