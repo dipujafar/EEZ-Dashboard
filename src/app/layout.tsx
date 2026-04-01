@@ -33,7 +33,7 @@ export default function RootLayout({
         <Providers>
           <AntdRegistry>
             <ConfigProvider theme={antTheme}>
-              <Toaster position="top-center" />
+              <Toaster position="top-center" richColors={true} />
               {children}
             </ConfigProvider>
           </AntdRegistry>

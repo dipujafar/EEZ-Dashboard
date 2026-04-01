@@ -19,6 +19,7 @@ export const tagTypes = {
   issueCategory: "IssueCategory",
   notification: "Notification",
   guidanceHubSuggestions: "GuidanceHubSuggestions",
+  uiSettings: "UiSettings"
 };
 
 export const tagTypesList = [
@@ -40,5 +41,6 @@ export const tagTypesList = [
   tagTypes.manageContent,
   tagTypes.issueCategory,
   tagTypes.notification,
-  tagTypes.guidanceHubSuggestions
+  tagTypes.guidanceHubSuggestions,
+  tagTypes.uiSettings
 ];
