@@ -89,7 +89,6 @@ export const AddContentModal = ({
     useGetSingleManageContentQuery(selectedId, { skip: !selectedId });
   const [updateContent] = useUpdateManageContentMutation();
 
-  console.log(singleManageContentData?.data);
 
   const form = useForm<ContentFormData>({
     resolver: zodResolver(contentSchema),

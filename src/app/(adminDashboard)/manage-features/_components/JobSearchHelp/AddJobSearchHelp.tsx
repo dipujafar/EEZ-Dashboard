@@ -49,8 +49,6 @@ const AddJobSearchHelp = ({
   const [updateAddJobSearchHelp] = useUpdateJobSearchHelpMutation();
 
 
-  console.log(singleJobSearchData?.data);
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {

@@ -16,7 +16,6 @@ const ManageContentTypeContainer = () => {
   const limit = useSearchParams().get("limit") || "9";
   const [searchText, setSearchText] = useState("");
   const [searchValue] = useDebounce(searchText, 500);
-  console.log(searchValue);
 
   // -------------- set queries --------------
   const queries: Record<string, string | number> = {};

@@ -24,8 +24,6 @@ const HRServiceContainer = () => {
   if (searchValue) queries["searchTerm"] = searchValue;
 
   const { data: hrAdminData, isLoading } = useGetAllHrAdminsQuery(queries);
-
-  console.log(hrAdminData?.data?.data);
 // ------------------- once any one want to search then set page to 1 ------------------------
   useEffect(() => {
     if (searchValue && searchText) {

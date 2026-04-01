@@ -16,7 +16,6 @@ const randomColorPick = (index: number) => {
 export default function HRServices({ data }: any) {
   const [deleteSpecialist] = useDeleteHrAdminMutation();
 
-  console.log(data)
 
   const confirmBlock= async (id: string) => {
     try {

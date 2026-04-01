@@ -41,7 +41,6 @@ const PolicyRightLibraryContainer = () => {
 
   const { data: policyAndRightData, isLoading } = useGetPolicyAndRightQuery(queries);
 
-  console.log(policyAndRightData);
 
   const data: TDataType[] = policyAndRightData?.data?.data?.map(
     (data: any, inx: number) => ({

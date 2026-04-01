@@ -76,8 +76,6 @@ const AddGuidanceSuggestionModal = ({
       }
     );
 
-  console.log({suggestionId});
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {

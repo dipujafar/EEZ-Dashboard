@@ -41,8 +41,6 @@ const SettingContainer = () => {
   const { data: uiSettingsData, isLoading } = useGetUiSettingsQuery(undefined);
   const [updateUiSettings] = useUpdateUiSettingsMutation();
 
-  console.log(uiSettingsData?.data?.stateLawsEnabled);
-
 
 
   const onChangeScheduleFeatureEnabled = async (checked: boolean) => {
