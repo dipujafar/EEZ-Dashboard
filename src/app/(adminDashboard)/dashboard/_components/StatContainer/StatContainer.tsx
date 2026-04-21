@@ -25,7 +25,7 @@ const StatContainer = () => {
       />
       <StatCard
         title="Total Earning"
-        value={`$${data?.data?.totalEarnings}`}
+        value={`$${Number(data?.data?.totalEarnings)?.toFixed(2)}`}
         icon={<EarningGrowthIcon />}
         className="bg-[#fff]"
       />

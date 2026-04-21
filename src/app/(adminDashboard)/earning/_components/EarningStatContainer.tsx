@@ -19,13 +19,13 @@ const EarningStatContainer = () => {
     <div className={`grid grid-cols-1 lg:grid-cols-2 gap-4 `}>
       <StatCard
         title="Total Earning"
-        value={`$${data?.data?.totalEarnings}`}
+        value={`$${Number(data?.data?.totalEarnings)?.toFixed(2)}`}
         icon={<EarningGrowthIcon />}
         className="bg-[#fff]"
       />
       <StatCard
         title="This Month Earning"
-        value={`$${data?.data?.totalThisMonthEarnings}`}
+        value={`$${Number(data?.data?.totalThisMonthEarnings)?.toFixed(2)}`}
         icon={<EarningGrowthIcon />}
         className="bg-[#fff]"
       />

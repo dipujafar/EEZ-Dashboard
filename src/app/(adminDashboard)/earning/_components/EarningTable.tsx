@@ -72,7 +72,7 @@ const EarningTable = () => {
               alt="profile-picture"
               width={40}
               height={40}
-              className="size-10"
+              className="size-10 object-cover"
             ></AvatarImage>
             <AvatarFallback className="bg-gray-300">
               {record?.providerName?.charAt(0)}

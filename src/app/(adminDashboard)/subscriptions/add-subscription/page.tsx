@@ -3,9 +3,9 @@ import AddSubscriptionForm from './_components/AddSubscriptionForm';
 
 const AddSubscriptionPage = () => {
     return (
-        <div>
+      
             <AddSubscriptionForm/>
-        </div>
+    
     );
 };
 

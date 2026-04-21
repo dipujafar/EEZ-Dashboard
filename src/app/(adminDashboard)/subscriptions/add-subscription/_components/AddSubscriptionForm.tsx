@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardContent,
@@ -22,7 +24,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import AnimatedArrow from "@/components/animatedArrows/AnimatedArrow";
-import { formSchema, FormValues } from "./FormShema";
 import {
   useCreateSubscriptionMutation,
   useSingleSubscriptionQuery,
@@ -30,9 +31,22 @@ import {
 } from "@/redux/api/subscriptionAPi";
 import { toast } from "sonner";
 import LoadingSpin from "@/components/loading-spain";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import SkeletonSubscriptionForm from "./Skeleton";
 import { useEffect } from "react";
+import { Trash2, Plus } from "lucide-react";
+import { formSchema, FormValues } from "./FormShema";
+
+// ─────────────────────────── Schema ───────────────────────────
+
+const SERVICES = [
+  { value: "aiChat", label: "AI Chat" },
+  { value: "guidanceHub", label: "Guidance Hub" },
+  { value: "communicationToolkit", label: "Communication Toolkit" },
+  { value: "jobSearch", label: "Job Search" },
+  { value: "workplaceJournal", label: "Workplace Journal" },
+] as const;
+
 
 export default function AddSubscriptionForm() {
   const [createSubscription, { isLoading }] = useCreateSubscriptionMutation();
@@ -41,309 +55,455 @@ export default function AddSubscriptionForm() {
   const subscriptionId = useSearchParams().get("id") || "";
   const { data: subscriptionData, isLoading: subscriptionLoading } =
     useSingleSubscriptionQuery(subscriptionId, { skip: !subscriptionId });
+  const router = useRouter();
+
+  const sub = subscriptionData?.data;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      planName: subscriptionData?.data?.title || "",
-      cost: "",
-      featuresPermissions: "",
-      customMonths: "",
+      title: "",
+      description: "",
+      amount: "",
+      creditsPerMonth: "",
+      isOneTime: false,
+      durationType: "monthly",
+      duration: "30",
+      featureAccess: {
+        guidanceHub: false,
+        aiChat: false,
+        communicationToolkit: false,
+        jobSearch: false,
+        workplaceJournal: false,
+      },
+      features: [{ title: "" }],
+      services: [],
     },
   });
 
-  const { setValue } = form;
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "features",
+  });
 
-  // --------------------------------- submit form -------------------------------
+  const { setValue, watch } = form;
+  const durationType = watch("durationType");
+
+  // ── Populate form when editing ──
+  useEffect(() => {
+    if (!sub) return;
+
+    setValue("title", sub.title ?? "");
+    setValue("description", sub.description ?? "");
+    setValue("amount", String(sub.amount ?? ""));
+    setValue("creditsPerMonth", String(sub.creditsPerMonth ?? ""));
+    setValue("isOneTime", sub.isOneTime ?? false);
+    setValue("durationType", sub.durationType ?? "monthly");
+    setValue("duration", String(sub.duration ?? "30"));
+    setValue("featureAccess", {
+      guidanceHub: sub.featureAccess?.guidanceHub ?? false,
+      aiChat: sub.featureAccess?.aiChat ?? false,
+      communicationToolkit: sub.featureAccess?.communicationToolkit ?? false,
+      jobSearch: sub.featureAccess?.jobSearch ?? false,
+      workplaceJournal: sub.featureAccess?.workplaceJournal ?? false,
+    });
+    setValue(
+      "features",
+      sub.features?.length ? sub.features : [{ title: "" }]
+    );
+    setValue("services", sub.services ?? []);
+  }, [sub]);
+
+  // ── Submit ──
   async function onSubmit(values: FormValues) {
-    const customData = {
-      title: values.planName,
-      amount: values?.planValidity === "free" ? 0 : Number(values.cost),
-      durationType: values?.planValidity === "free" ? "free" : "monthly",
+    const payload = {
+      title: values.title,
+      description: values.description,
+      amount: Number(values.amount),
+      creditsPerMonth: Number(values.creditsPerMonth),
+      isOneTime: values.isOneTime,
+      durationType: values.durationType,
       duration:
-        values?.planValidity === "custom"
-          ? Number(values?.customMonths)
-          : values?.planValidity === "free"
-          ? 0
-          : Number(values.planValidity),
-      description: values.featuresPermissions,
+        values.durationType === "monthly" ? Number(values.duration) : 0,
       type: "premium",
+      featureAccess: values.featureAccess,
+      features: values.features.filter((f) => f.title.trim() !== ""),
+      services: values.services,
     };
 
-    //  -------------------------- if the subscription exists then update it ----------------------------
-    if (subscriptionId && subscriptionData?.data) {
+    if (subscriptionId && sub) {
       try {
-        await updateSubscription({
-          id: subscriptionId,
-          data: customData,
-        }).unwrap();
+        await updateSubscription({ id: subscriptionId, data: payload }).unwrap();
         toast.success("Plan updated successfully");
-        form.reset();
+        router.push("/subscriptions");
       } catch (error: any) {
-        toast.error(error?.data?.message);
+        toast.error(error?.data?.message ?? "Update failed");
       }
       return;
     }
 
-    // -------------------------- if the subscription does not exist then create it ----------------------------
     try {
-      await createSubscription(customData).unwrap();
+      await createSubscription(payload).unwrap();
       toast.success("Plan created successfully");
       form.reset();
+      router.push("/subscriptions");
     } catch (error: any) {
-      toast.error(error?.data?.message);
+      toast.error(error?.data?.message ?? "Creation failed");
     }
   }
-
-  // ------------------------------ set default values ------------------------------
-  useEffect(() => {
-    if (subscriptionData?.data) {
-      setValue("planName", subscriptionData?.data?.title);
-      setValue("cost", String(subscriptionData?.data?.amount));
-      setValue("planValidity", setDefaultSubscriptionDuration() as string);
-      setValue(
-        "customMonths",
-        (setDefaultSubscriptionDuration() === "custom"
-          ? String(subscriptionData?.data?.duration)
-          : "") as string
-      );
-      setValue("featuresPermissions", subscriptionData?.data?.description);
-    }
-  }, [subscriptionData?.data]);
-
-  // ------------------------------------------------------------------------------
-
-  // ---------------------------------------- show skeleton if loading -------------------------------
 
   if (subscriptionId && subscriptionLoading) {
     return <SkeletonSubscriptionForm />;
   }
 
-  const setDefaultSubscriptionDuration = () => {
-    if (subscriptionData?.data?.durationType === "free") {
-      return "free";
-    } else if (
-      subscriptionData?.data?.duration === 1 ||
-      subscriptionData?.data?.duration === 3
-    ) {
-      return `${subscriptionData?.data?.duration}`;
-    } else if (
-      subscriptionData?.data &&
-      (subscriptionData?.data?.duration !== 1 ||
-        subscriptionData?.data?.duration !== 3)
-    ) {
-      return "custom";
-    } else {
-      return null;
-    }
-  };
+  // ─────────────────────────── UI ───────────────────────────
 
   return (
-    <div>
-      <div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">
-              {subscriptionId
-                ? "Subscription Plan Editor"
-                : "Add Subscription Plan"}
-            </CardTitle>
-            <CardDescription>
-              Configure plan details and pricing
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-8"
-              >
-                {/* Plan Information Section */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-gray-900">
-                    Plan Information
-                  </h3>
 
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="planName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm text-gray-600">
-                            Plan Name
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g. Basic Plan"
-                              className="bg-white"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold">
+          {subscriptionId ? "Subscription Plan Editor" : "Add Subscription Plan"}
+        </CardTitle>
+        <CardDescription>Configure plan details and pricing</CardDescription>
+      </CardHeader>
 
-                    <FormField
-                      control={form.control}
-                      name="cost"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm text-gray-600">
-                            Cost (Enter 0 for free plans)
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                                $
-                              </span>
-                              <Input
-                                placeholder="0.00"
-                                className="bg-white pl-8"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
-                {/* Features & Permissions Section */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-gray-900">
-                    Features & Permissions
-                  </h3>
+            {/* ── Plan Information ── */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-gray-900">Plan Information</h3>
 
-                  <FormField
-                    control={form.control}
-                    name="featuresPermissions"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Access core career tools, AI assistance, scripts, and job search resources — all for free."
-                            className="min-h-[120px] bg-white resize-none"
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* Title */}
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm text-gray-600">Plan Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter Plan Name" className="bg-gray-50 py-5" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Amount */}
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm text-gray-600">
+                        Cost (Enter 0 for free plans)
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                          <Input
+                            placeholder="Enter Cost"
+                            className="bg-gray-50 pl-8 py-5"
+                            type="number"
+                            step="0.01"
+                            min="0"
                             {...field}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Plan Validity Section */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-gray-900">
-                    Plan Validity
-                  </h3>
-
-                  <FormField
-                    control={form.control}
-                    name="planValidity"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={
-                              setDefaultSubscriptionDuration() || field.value
-                            }
-                            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="free" id="free" />
-                              <label
-                                htmlFor="free"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                Free
-                              </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="1" id="1" />
-                              <label
-                                htmlFor="1"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                1 Month
-                              </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="3" id="3" />
-                              <label
-                                htmlFor="3"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                3 Month
-                              </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="custom" id="custom" />
-                              <label
-                                htmlFor="custom"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                Add any plan month
-                              </label>
-                            </div>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {form.watch("planValidity") === "custom" && (
-                    <FormField
-                      control={form.control}
-                      name="customMonths"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter number of months"
-                              className="max-w-xs bg-white"
-                              type="number"
-                              min="1"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
+                />
 
-                {/* Action Buttons */}
-                <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-end">
-                  <Button
-                    disabled={isLoading || isUpdateLoading}
-                    style={{
-                      background:
-                        "linear-gradient(180deg, #4E9DA6 0.89%, #1A2935 100.89%)",
-                      boxShadow: "7px 8px 4.7px 0px rgba(0, 0, 0, 0.08) inset",
-                    }}
-                    type="submit"
-                    className="w-full bg-teal-600 hover:bg-teal-700 group"
-                  >
-                    {subscriptionId ? "Update" : "Submit"}
-                    {isLoading ? <LoadingSpin /> : <AnimatedArrow />}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+                {/* Credits Per Month */}
+                <FormField
+                  control={form.control}
+                  name="creditsPerMonth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm text-gray-600">Credits Per Month</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter Credits Per Month"
+                          className="bg-gray-50 py-5"
+                          type="number"
+                          min="0"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Is One-Time Toggle */}
+                <FormField
+                  control={form.control}
+                  name="isOneTime"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col justify-center gap-1">
+                      <FormLabel className="text-sm text-gray-600">One-Time Payment</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                          <span className="text-sm text-gray-500">
+                            {field.value ? "Yes — charged once" : "No — recurring"}
+                          </span>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* ── Description ── */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-900">Description</h3>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe what this plan includes…"
+                        className="min-h-[100px] bg-gray-50 resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* ── Duration Type ── */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-900">Duration Type</h3>
+              <FormField
+                control={form.control}
+                name="durationType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex flex-wrap gap-4"
+                      >
+                        {[
+                          { value: "monthly", label: "Monthly" },
+                          { value: "free", label: "Free" },
+                          { value: "oneTime", label: "One-Time" },
+                        ].map((opt) => (
+                          <div key={opt.value} className="flex items-center space-x-2">
+                            <RadioGroupItem value={opt.value} id={`dur-${opt.value}`} />
+                            <label
+                              htmlFor={`dur-${opt.value}`}
+                              className="text-sm font-medium leading-none cursor-pointer"
+                            >
+                              {opt.label}
+                            </label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Duration (days) — only for monthly */}
+              {durationType === "monthly" && (
+                <FormField
+                  control={form.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm text-gray-600">Duration (days)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter Duration (days)"
+                          className="max-w-xs bg-gray-50 py-5"
+                          type="number"
+                          min="1"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+
+            {/* ── Feature Access Toggles ── */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-900">Feature Access</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {(
+                  [
+                    { name: "featureAccess.guidanceHub", label: "Guidance Hub" },
+                    { name: "featureAccess.aiChat", label: "AI Chat" },
+                    { name: "featureAccess.communicationToolkit", label: "Communication Toolkit" },
+                    { name: "featureAccess.jobSearch", label: "Job Search" },
+                    { name: "featureAccess.workplaceJournal", label: "Workplace Journal" },
+                  ] as const
+                ).map((item) => (
+                  <FormField
+                    key={item.name}
+                    control={form.control}
+                    name={item.name}
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
+                        <FormLabel className="text-sm text-gray-700 cursor-pointer">
+                          {item.label}
+                        </FormLabel>
+                        <FormControl>
+                          <Switch
+                            checked={field.value as boolean}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* ── Features List ── */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-900">Features</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => append({ title: "" })}
+                  className="flex items-center gap-1 text-xs border-main-color"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Feature
+                </Button>
+              </div>
+
+              <div className="space-y-2">
+                {fields.map((field, index) => (
+                  <FormField
+                    key={field.id}
+                    control={form.control}
+                    name={`features.${index}.title`}
+                    render={({ field: f }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              placeholder={`Feature ${index + 1}`}
+                              className="bg-gray-50 py-5"
+                              {...f}
+                            />
+                            {fields.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="shrink-0 text-gray-400 hover:text-red-500"
+                                onClick={() => remove(index)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* ── Services ── */}
+            <section className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-900">Services</h3>
+              <FormField
+                control={form.control}
+                name="services"
+                render={() => (
+                  <FormItem>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {SERVICES.map((service) => (
+                        <FormField
+                          key={service.value}
+                          control={form.control}
+                          name="services"
+                          render={({ field }) => {
+                            const checked = field.value?.includes(service.value);
+                            return (
+                              <FormItem className="flex items-center space-x-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
+                                <FormControl>
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={(e) => {
+                                      const current = field.value ?? [];
+
+                                      if (e.target.checked) {
+                                        field.onChange([...current, service.value]);
+                                      } else {
+                                        field.onChange(
+                                          current.filter((s) => s !== service.value)
+                                        );
+                                      }
+                                    }}
+                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm text-gray-700 cursor-pointer font-normal">
+                                  {service.label}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </section>
+
+            {/* ── Submit ── */}
+            <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-end">
+              <Button
+                disabled={isLoading || isUpdateLoading}
+                style={{
+                  background:
+                    "linear-gradient(180deg, #4E9DA6 0.89%, #1A2935 100.89%)",
+                  boxShadow: "7px 8px 4.7px 0px rgba(0, 0, 0, 0.08) inset",
+                }}
+                type="submit"
+                className="w-full bg-teal-600 hover:bg-teal-700 group sm:w-auto"
+              >
+                {subscriptionId ? "Update Plan" : "Create Plan"}
+                {isLoading || isUpdateLoading ? <LoadingSpin /> : <AnimatedArrow />}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+
   );
 }
