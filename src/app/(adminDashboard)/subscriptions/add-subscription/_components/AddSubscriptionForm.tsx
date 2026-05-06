@@ -42,8 +42,6 @@ const SERVICES = [
   { value: "aiChat", label: "AI Chat" },
   { value: "guidanceHub", label: "Guidance Hub" },
   { value: "communicationToolkit", label: "Communication Toolkit" },
-  { value: "jobSearch", label: "Job Search" },
-  { value: "workplaceJournal", label: "Workplace Journal" },
 ] as const;
 
 
@@ -72,8 +70,6 @@ export default function AddSubscriptionForm() {
         guidanceHub: false,
         aiChat: false,
         communicationToolkit: false,
-        jobSearch: false,
-        workplaceJournal: false,
       },
       features: [{ title: "" }],
       services: [],
@@ -103,8 +99,6 @@ export default function AddSubscriptionForm() {
       guidanceHub: sub.featureAccess?.guidanceHub ?? false,
       aiChat: sub.featureAccess?.aiChat ?? false,
       communicationToolkit: sub.featureAccess?.communicationToolkit ?? false,
-      jobSearch: sub.featureAccess?.jobSearch ?? false,
-      workplaceJournal: sub.featureAccess?.workplaceJournal ?? false,
     });
     setValue(
       "features",
@@ -113,7 +107,7 @@ export default function AddSubscriptionForm() {
     setValue("services", sub.services ?? []);
   }, [sub]);
 
-  
+
 
   // ── Submit ──
   async function onSubmit(values: FormValues) {
@@ -356,8 +350,7 @@ export default function AddSubscriptionForm() {
                     { name: "featureAccess.guidanceHub", label: "Guidance Hub" },
                     { name: "featureAccess.aiChat", label: "AI Chat" },
                     { name: "featureAccess.communicationToolkit", label: "Communication Toolkit" },
-                    { name: "featureAccess.jobSearch", label: "Job Search" },
-                    { name: "featureAccess.workplaceJournal", label: "Workplace Journal" },
+
                   ] as const
                 ).map((item) => (
                   <FormField

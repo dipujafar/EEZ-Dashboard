@@ -13,8 +13,6 @@ export const formSchema = z
       guidanceHub: z.boolean(),
       aiChat: z.boolean(),
       communicationToolkit: z.boolean(),
-      jobSearch: z.boolean(),
-      workplaceJournal: z.boolean(),
     }),
     features: z.array(z.object({ title: z.string().min(1, "Feature title is required") })),
     services: z.array(z.string()),

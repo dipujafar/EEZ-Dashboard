@@ -1,5 +1,3 @@
-
-
 export const tagTypes = {
   auth: "Auth",
   users: "Users",
@@ -19,7 +17,8 @@ export const tagTypes = {
   issueCategory: "IssueCategory",
   notification: "Notification",
   guidanceHubSuggestions: "GuidanceHubSuggestions",
-  uiSettings: "UiSettings"
+  uiSettings: "UiSettings",
+  credits: "credits",
 };
 
 export const tagTypesList = [
@@ -42,5 +41,6 @@ export const tagTypesList = [
   tagTypes.issueCategory,
   tagTypes.notification,
   tagTypes.guidanceHubSuggestions,
-  tagTypes.uiSettings
+  tagTypes.uiSettings,
+  tagTypes.credits,
 ];
