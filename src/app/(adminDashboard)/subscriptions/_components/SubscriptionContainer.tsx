@@ -76,7 +76,7 @@ export default function SubscriptionContainer() {
                     {plan?.isOneTime
                       ? " / one-time"
                       : plan?.duration
-                      ? ` / ${plan?.duration} days`
+                      ? ` / ${plan?.duration} month`
                       : ""}
                   </span>
                 </div>

@@ -63,9 +63,7 @@ export default function AddSubscriptionForm() {
       description: "",
       amount: "",
       creditsPerMonth: "",
-      isOneTime: false,
-      durationType: "monthly",
-      duration: "30",
+      duration: "1",
       featureAccess: {
         guidanceHub: false,
         aiChat: false,
@@ -82,7 +80,6 @@ export default function AddSubscriptionForm() {
   });
 
   const { setValue, watch } = form;
-  const durationType = watch("durationType");
 
   // ── Populate form when editing ──
   useEffect(() => {
@@ -92,8 +89,6 @@ export default function AddSubscriptionForm() {
     setValue("description", sub.description ?? "");
     setValue("amount", String(sub.amount ?? ""));
     setValue("creditsPerMonth", String(sub.creditsPerMonth ?? ""));
-    setValue("isOneTime", sub.isOneTime ?? false);
-    setValue("durationType", sub.durationType ?? "monthly");
     setValue("duration", String(sub.duration ?? "30"));
     setValue("featureAccess", {
       guidanceHub: sub.featureAccess?.guidanceHub ?? false,
@@ -116,10 +111,7 @@ export default function AddSubscriptionForm() {
       description: values.description,
       amount: Number(values.amount),
       creditsPerMonth: Number(values.creditsPerMonth),
-      isOneTime: values.isOneTime,
-      durationType: values.durationType,
-      duration:
-        values.durationType === "monthly" ? Number(values.duration) : 0,
+      duration: Number(values.duration),
       type: "premium",
       featureAccess: values.featureAccess,
       features: values.features.filter((f) => f.title.trim() !== ""),
@@ -235,28 +227,7 @@ export default function AddSubscriptionForm() {
                   )}
                 />
 
-                {/* Is One-Time Toggle */}
-                <FormField
-                  control={form.control}
-                  name="isOneTime"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col justify-center gap-1">
-                      <FormLabel className="text-sm text-gray-600">One-Time Payment</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center gap-3">
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                          <span className="text-sm text-gray-500">
-                            {field.value ? "Yes — charged once" : "No — recurring"}
-                          </span>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
               </div>
             </div>
 
@@ -283,62 +254,26 @@ export default function AddSubscriptionForm() {
 
             {/* ── Duration Type ── */}
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-gray-900">Duration Type</h3>
+
               <FormField
                 control={form.control}
-                name="durationType"
+                name="duration"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel className="text-sm text-gray-600">Duration (month)</FormLabel>
                     <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        className="flex flex-wrap gap-4"
-                      >
-                        {[
-                          { value: "monthly", label: "Monthly" },
-                          { value: "free", label: "Free" },
-                          { value: "oneTime", label: "One-Time" },
-                        ].map((opt) => (
-                          <div key={opt.value} className="flex items-center space-x-2">
-                            <RadioGroupItem value={opt.value} id={`dur-${opt.value}`} />
-                            <label
-                              htmlFor={`dur-${opt.value}`}
-                              className="text-sm font-medium leading-none cursor-pointer"
-                            >
-                              {opt.label}
-                            </label>
-                          </div>
-                        ))}
-                      </RadioGroup>
+                      <Input
+                        placeholder="Enter Duration (days)"
+                        className="max-w-xs bg-gray-50 py-5"
+                        type="number"
+                        min="1"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {/* Duration (days) — only for monthly */}
-              {durationType === "monthly" && (
-                <FormField
-                  control={form.control}
-                  name="duration"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-gray-600">Duration (days)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter Duration (days)"
-                          className="max-w-xs bg-gray-50 py-5"
-                          type="number"
-                          min="1"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
             </div>
 
             {/* ── Feature Access Toggles ── */}
